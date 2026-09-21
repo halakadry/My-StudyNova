@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 app.use('/api/users', require('./routes/users'));
 app.use('/api/tasks', require('./routes/tasks'));
-
+app.use('/api/schedule', require('./routes/schedule'));
 app.get('/', (req, res) => {
   res.send('StudyNova backend is running');
 });
