@@ -1,0 +1,746 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* =====================================
+   STUDYNOVA - CLASSIC DESIGN
+===================================== */
+
+.sn-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #fbf6ef;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 55px 6%;
+
+  font-family: 'Inter', sans-serif;
+  color: #17283e;
+}
+
+.sn-page * {
+  box-sizing: border-box;
+}
+
+/* =====================================
+   MAIN LAYOUT
+===================================== */
+
+.sn-layout {
+  width: 100%;
+  max-width: 1350px;
+
+  display: grid;
+  grid-template-columns:
+    minmax(0, 0.9fr)
+    minmax(0, 1.1fr);
+
+  align-items: center;
+  gap: 75px;
+}
+
+/* =====================================
+   LEFT SIDE - USED BY LOGIN
+===================================== */
+
+.sn-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-left: 20px;
+}
+
+/* LOGO */
+
+.sn-logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.sn-logo-icon {
+  width: 72px;
+  height: 72px;
+}
+
+.sn-logo-text {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 51px;
+  font-weight: 600;
+  letter-spacing: -1.5px;
+
+  color: #17283e;
+  white-space: nowrap;
+}
+
+.sn-logo-text span {
+  color: #586748;
+}
+
+/* TAGLINE */
+
+.sn-tagline {
+  margin-top: 3px;
+  margin-left: 88px;
+
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 4px;
+
+  color: #647084;
+}
+
+/* DECORATIVE LINE */
+
+.sn-accent-line {
+  width: 65px;
+  height: 3px;
+
+  background: #8b783b;
+
+  margin-top: 45px;
+  margin-bottom: 32px;
+}
+
+/* INTRODUCTION */
+
+.sn-intro {
+  max-width: 500px;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(27px, 2.5vw, 38px);
+  font-weight: 400;
+  line-height: 1.35;
+
+  margin: 0;
+  color: #17283e;
+}
+
+/* LEAF DECORATION */
+
+.sn-decoration {
+  width: 150px;
+  height: 150px;
+  margin-top: 45px;
+  opacity: 0.8;
+}
+
+/* =====================================
+   SHARED CARD
+===================================== */
+
+.sn-card {
+  width: 100%;
+  max-width: 620px;
+
+  justify-self: center;
+
+  padding: 48px 42px 40px;
+
+  background: #fffefa;
+
+  border: 1px solid #e7dccd;
+  border-radius: 19px;
+
+  box-shadow:
+    0 15px 45px rgba(71, 57, 39, 0.055);
+}
+
+/* CARD HEADING */
+
+.sn-card-title {
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: 44px;
+  font-weight: 600;
+  text-align: center;
+
+  color: #17283e;
+
+  margin: 0 0 40px;
+}
+
+/* =====================================
+   FORM
+===================================== */
+
+.sn-form {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+}
+
+.sn-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* LABELS */
+
+.sn-field label {
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  color: #17283e;
+}
+
+/* =====================================
+   INPUT FIELDS
+===================================== */
+
+.sn-input-wrapper {
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  width: 100%;
+  min-height: 54px;
+
+  padding: 0 15px;
+
+  background: #ffffff;
+
+  border: 1px solid #cdd2db;
+  border-radius: 10px;
+
+  transition: 0.2s ease;
+}
+
+.sn-input-wrapper:focus-within {
+  border-color: #626e50;
+
+  box-shadow:
+    0 0 0 3px rgba(98, 110, 80, 0.1);
+}
+
+/* INPUT ICONS */
+
+.sn-input-icon {
+  width: 20px;
+  height: 20px;
+
+  color: #65748a;
+  flex-shrink: 0;
+}
+
+/* INPUT TEXT */
+
+.sn-input-wrapper input {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 52px;
+
+  padding: 0;
+
+  border: none;
+  outline: none;
+
+  background: transparent;
+
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+
+  color: #17283e;
+}
+
+.sn-input-wrapper input:focus {
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.sn-input-wrapper input::placeholder {
+  color: #8b95a5;
+}
+
+/* =====================================
+   SHOW / HIDE PASSWORD
+===================================== */
+
+.sn-eye-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px;
+
+  background: transparent;
+  border: none;
+
+  color: #65748a;
+
+  cursor: pointer;
+}
+
+.sn-eye-button:hover {
+  color: #586748;
+}
+
+.sn-eye-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* =====================================
+   REGISTER BUTTON
+===================================== */
+
+.sn-register-button {
+  width: 100%;
+  min-height: 54px;
+
+  margin-top: 3px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #59674a;
+  color: #ffffff;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.sn-register-button:hover {
+  background: #47543a;
+  transform: translateY(-1px);
+}
+
+.sn-register-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =====================================
+   DIVIDER
+===================================== */
+
+.sn-divider {
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  margin: 23px 0;
+}
+
+.sn-divider::before,
+.sn-divider::after {
+  content: "";
+
+  flex: 1;
+  height: 1px;
+
+  background: #d2d6de;
+}
+
+.sn-divider span {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  color: #536176;
+}
+
+/* =====================================
+   GOOGLE BUTTON
+===================================== */
+
+.sn-google-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  width: 100%;
+  min-height: 54px;
+
+  background: #ffffff;
+
+  border: 1px solid #cdd2db;
+  border-radius: 10px;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+
+  color: #17283e;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.sn-google-button:hover {
+  background: #f6f5f1;
+  border-color: #59674a;
+}
+
+.sn-google-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* GOOGLE ICON */
+
+.sn-google-icon {
+  font-family: Arial, sans-serif;
+
+  font-size: 23px;
+  font-weight: 700;
+
+  background: conic-gradient(
+    #4285f4 0deg 90deg,
+    #34a853 90deg 180deg,
+    #fbbc05 180deg 250deg,
+    #ea4335 250deg 310deg,
+    #4285f4 310deg
+  );
+
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+}
+
+/* =====================================
+   LOGIN / REGISTER LINK
+===================================== */
+
+.sn-login-text {
+  margin: 25px 0 0;
+
+  text-align: center;
+
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+
+  color: #647084;
+}
+
+.sn-login-button {
+  padding: 0;
+  margin-left: 5px;
+
+  background: transparent;
+  border: none;
+
+  font-family: inherit;
+  font-size: inherit;
+
+  color: #6b5724;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.sn-login-button:hover {
+  text-decoration: underline;
+}
+
+/* =====================================
+   ERROR MESSAGE
+===================================== */
+
+.sn-error {
+  background: #fff0ed;
+
+  color: #a43737;
+
+  border: 1px solid #efcbc4;
+
+  padding: 12px;
+
+  border-radius: 8px;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* =====================================
+   SUCCESS SCREEN
+===================================== */
+
+.sn-success-icon {
+  font-size: 45px;
+
+  text-align: center;
+
+  margin-bottom: 18px;
+
+  color: #59674a;
+}
+
+.sn-success-message {
+  text-align: center;
+  line-height: 1.8;
+
+  font-size: 15px;
+  color: #647084;
+
+  margin-bottom: 25px;
+}
+
+/* =====================================
+   SHARED RESPONSIVE DESIGN
+===================================== */
+
+@media (max-width: 1000px) {
+
+  .sn-layout {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .sn-left {
+    align-items: center;
+    text-align: center;
+    padding-left: 0;
+  }
+
+  .sn-accent-line {
+    margin-top: 25px;
+    margin-bottom: 25px;
+  }
+
+  .sn-decoration {
+    display: none;
+  }
+
+  .sn-card {
+    max-width: 580px;
+  }
+
+}
+
+@media (max-width: 600px) {
+
+  .sn-page {
+    padding: 30px 15px;
+  }
+
+  .sn-logo-icon {
+    width: 50px;
+    height: 50px;
+  }
+
+  .sn-logo-text {
+    font-size: 35px;
+  }
+
+  .sn-tagline {
+    margin-left: 0;
+    letter-spacing: 2px;
+    font-size: 9px;
+  }
+
+  .sn-intro {
+    font-size: 25px;
+  }
+
+  .sn-card {
+    padding: 35px 23px;
+    border-radius: 15px;
+  }
+
+  .sn-card-title {
+    font-size: 34px;
+    margin-bottom: 30px;
+  }
+
+  .sn-field label {
+    font-size: 15px;
+  }
+
+  .sn-register-button {
+    font-size: 17px;
+  }
+
+}
+
+/* ==========================================
+   CENTERED REGISTER PAGE
+   ONLY APPLIES TO REGISTER
+========================================== */
+
+/* BACKGROUND */
+
+.sn-page:not(.sn-login-page) {
+  min-height: 100vh;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 35px 20px;
+
+  background: #fbf6ef;
+}
+
+/* CENTER LAYOUT */
+
+.sn-page:not(.sn-login-page) .sn-layout {
+  width: 100%;
+  max-width: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0;
+}
+
+/* REMOVE LEFT SIDE */
+
+.sn-page:not(.sn-login-page) .sn-left {
+  display: none;
+}
+
+/* ==========================================
+   CENTERED REGISTRATION CARD
+========================================== */
+
+.sn-page:not(.sn-login-page) .sn-card {
+  width: 100%;
+  max-width: 550px;
+
+  margin: 0 auto;
+  padding: 35px 42px;
+
+  background: #fffefa;
+
+  border: 1px solid #e7dccd;
+  border-radius: 20px;
+
+  box-shadow:
+    0 15px 45px rgba(71, 57, 39, 0.07);
+}
+
+/* ==========================================
+   STUDYNOVA LOGO INSIDE REGISTER CARD
+========================================== */
+
+.sn-register-brand {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  margin-bottom: 25px;
+}
+
+/* LOGO ROW */
+
+.sn-register-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+}
+
+/* BOOK ICON */
+
+.sn-register-logo .sn-logo-icon {
+  width: 52px;
+  height: 52px;
+}
+
+/* STUDYNOVA NAME */
+
+.sn-register-logo .sn-logo-text {
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: 38px;
+  font-weight: 600;
+
+  letter-spacing: -1px;
+
+  color: #17283e;
+}
+
+/* NOVA IN OLIVE GREEN */
+
+.sn-register-logo .sn-logo-text span {
+  color: #59674a;
+}
+
+/* PLAN ORGANIZE ACHIEVE */
+
+.sn-register-tagline {
+  margin-top: 5px;
+
+  font-family: 'Inter', Arial, sans-serif;
+
+  font-size: 9px;
+  font-weight: 600;
+
+  letter-spacing: 3px;
+
+  color: #65748a;
+}
+
+/* ==========================================
+   CREATE ACCOUNT TITLE
+========================================== */
+
+.sn-page:not(.sn-login-page) .sn-card-title {
+  font-family: Georgia, 'Times New Roman', serif;
+
+  font-size: 34px;
+  font-weight: 600;
+
+  color: #17283e;
+
+  text-align: center;
+
+  margin: 0 0 28px;
+}
+
+/* ==========================================
+   REGISTER PAGE MOBILE DESIGN
+========================================== */
+
+@media (max-width: 600px) {
+
+  .sn-page:not(.sn-login-page) {
+    padding: 25px 15px;
+  }
+
+  .sn-page:not(.sn-login-page) .sn-card {
+    padding: 30px 23px;
+    border-radius: 16px;
+  }
+
+  .sn-register-logo .sn-logo-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .sn-register-logo .sn-logo-text {
+    font-size: 30px;
+  }
+
+  .sn-register-tagline {
+    font-size: 8px;
+    letter-spacing: 2px;
+  }
+
+  .sn-page:not(.sn-login-page) .sn-card-title {
+    font-size: 30px;
+    margin-bottom: 25px;
+  }
+
+}
