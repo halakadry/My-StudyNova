@@ -4,6 +4,7 @@ import { auth } from '../services/firebase';
 import api from '../services/api';
 import Analytics from '../components/Analytics';
 import ScheduleList from '../components/ScheduleList';
+import WeekCalendar from '../components/WeekCalendar';
 import TaskItem from '../components/TaskItem';
 import ExamItem from '../components/ExamItem';
 
@@ -25,6 +26,7 @@ function Dashboard({ dbUser }) {
 
   const [schedule, setSchedule] = useState(null);
   const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [scheduleView, setScheduleView] = useState('week'); // 'week' or 'list'
 
   const [sleepTime, setSleepTime] = useState(23);
   const [wakeTime, setWakeTime] = useState(8);
@@ -253,8 +255,16 @@ function Dashboard({ dbUser }) {
 
   const cardStyle = { border: '1px solid #ddd', borderRadius: 8, padding: 16, flex: 1, textAlign: 'center' };
 
+  const viewButtonStyle = (active) => ({
+    padding: '4px 12px',
+    background: active ? '#2f6fbf' : '#f0f0f0',
+    color: active ? 'white' : 'inherit',
+    border: '1px solid #ccc',
+    cursor: 'pointer',
+  });
+
   return (
-    <div style={{ maxWidth: 800, margin: '2rem auto', fontFamily: 'sans-serif' }}>
+    <div style={{ maxWidth: 960, margin: '2rem auto', fontFamily: 'sans-serif' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1>StudyNova</h1>
         <button onClick={() => signOut(auth)} style={{ padding: '6px 12px' }}>
@@ -531,8 +541,29 @@ function Dashboard({ dbUser }) {
 
         {schedule?.entries && (
           <div style={{ marginTop: 12 }}>
-            <h3>Your Schedule</h3>
-            <ScheduleList entries={schedule.entries} onToggle={toggleSessionDone} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3>Your Schedule</h3>
+              <div>
+                <button
+                  onClick={() => setScheduleView('week')}
+                  style={{ ...viewButtonStyle(scheduleView === 'week'), borderRadius: '6px 0 0 6px' }}
+                >
+                  Week
+                </button>
+                <button
+                  onClick={() => setScheduleView('list')}
+                  style={{ ...viewButtonStyle(scheduleView === 'list'), borderRadius: '0 6px 6px 0' }}
+                >
+                  List
+                </button>
+              </div>
+            </div>
+
+            {scheduleView === 'week' ? (
+              <WeekCalendar entries={schedule.entries} onToggle={toggleSessionDone} />
+            ) : (
+              <ScheduleList entries={schedule.entries} onToggle={toggleSessionDone} />
+            )}
           </div>
         )}
       </div>
