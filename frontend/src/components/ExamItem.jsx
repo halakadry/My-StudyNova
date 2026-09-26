@@ -27,47 +27,45 @@ function ExamItem({ exam, disabled, onSave, onDelete }) {
     }
   };
 
-  const boxStyle = { border: '1px solid #eee', borderRadius: 6, padding: 10, marginBottom: 8 };
-
   if (editing) {
     return (
-      <div style={boxStyle}>
+      <div className="db-item db-item-edit">
         <input
+          className="db-input"
           type="text"
           value={form.subject}
           onChange={(e) => setForm({ ...form, subject: e.target.value })}
-          style={{ width: '100%', padding: 6, marginBottom: 6 }}
         />
-        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+        <div className="db-form-row" style={{ margin: '8px 0' }}>
           <input
+            className="db-input"
             type="date"
             value={form.date}
             onChange={(e) => setForm({ ...form, date: e.target.value })}
-            style={{ flex: 1, padding: 6 }}
           />
           <select
+            className="db-select"
             value={form.difficulty}
             onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
-            style={{ padding: 6 }}
           >
             <option>Easy</option>
             <option>Medium</option>
             <option>Hard</option>
           </select>
           <input
+            className="db-input"
             type="number"
             min="1"
             value={form.prepHoursNeeded}
             onChange={(e) => setForm({ ...form, prepHoursNeeded: e.target.value })}
-            style={{ width: 60, padding: 6 }}
+            aria-label="Prep hours"
           />
-          <span style={{ alignSelf: 'center', fontSize: 12 }}>h prep</span>
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <button onClick={save} disabled={saving} style={{ padding: '4px 10px' }}>
-            {saving ? 'Saving...' : 'Save'}
+        <div className="db-item-actions">
+          <button className="db-btn db-btn-primary db-btn-small" onClick={save} disabled={saving}>
+            {saving ? 'Saving…' : 'Save'}
           </button>
-          <button onClick={() => setEditing(false)} disabled={saving} style={{ padding: '4px 10px' }}>
+          <button className="db-btn db-btn-small" onClick={() => setEditing(false)} disabled={saving}>
             Cancel
           </button>
         </div>
@@ -76,18 +74,20 @@ function ExamItem({ exam, disabled, onSave, onDelete }) {
   }
 
   return (
-    <div style={{ ...boxStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="db-item">
       <div>
-        <strong>{exam.subject}</strong>
-        <div style={{ fontSize: 12, color: '#666' }}>
-          {new Date(exam.date).toLocaleDateString()} · {exam.difficulty} · ~{exam.prepHoursNeeded}h prep
+        <div className="db-item-title" style={{ textTransform: 'capitalize' }}>
+          {exam.subject}
+        </div>
+        <div className="db-item-meta">
+          {new Date(exam.date).toLocaleDateString('en-GB')} · {exam.difficulty} · ~{exam.prepHoursNeeded}h prep
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 4 }}>
-        <button onClick={startEdit} disabled={disabled} style={{ padding: '4px 8px' }}>
+      <div className="db-item-actions">
+        <button className="db-btn db-btn-small" onClick={startEdit} disabled={disabled}>
           Edit
         </button>
-        <button onClick={() => onDelete(exam._id)} disabled={disabled} style={{ padding: '4px 8px' }}>
+        <button className="db-btn db-btn-small db-btn-danger" onClick={() => onDelete(exam._id)} disabled={disabled}>
           Delete
         </button>
       </div>

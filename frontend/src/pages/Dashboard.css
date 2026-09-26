@@ -1,0 +1,709 @@
+/* ========================================
+   STUDYNOVA DASHBOARD — matches Login/Register
+   Change these variables to adjust the whole dashboard
+======================================== */
+
+.db-page {
+  --db-paper: #faf6ef;
+  --db-surface: #fffdf9;
+  --db-ink: #1b2a3a;
+  --db-muted: #6f6a60;
+  --db-line: #e7dfd2;
+  --db-olive: #5c6b4a;
+  --db-olive-dark: #4a573b;
+  --db-sage: #eef1e8;
+  --db-sage-strong: #dfe5d5;
+  --db-gold: #947a32;
+  --db-gold-tint: #f5eedb;
+  --db-danger: #a5452f;
+  --db-serif: 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --db-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  min-height: 100vh;
+  background: var(--db-paper);
+  color: var(--db-ink);
+  font-family: var(--db-sans);
+}
+
+.db-page *,
+.db-page *::before,
+.db-page *::after {
+  box-sizing: border-box;
+}
+
+/* ---------- Header ---------- */
+
+.db-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 40px;
+  background: var(--db-surface);
+  border-bottom: 1px solid var(--db-line);
+}
+
+.db-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.db-logo svg {
+  width: 36px;
+  height: 36px;
+}
+
+.db-logo-text {
+  font-family: var(--db-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--db-ink);
+}
+
+.db-logo-text span {
+  color: var(--db-olive);
+}
+
+.db-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.db-user {
+  font-size: 14px;
+  color: var(--db-muted);
+}
+
+/* ---------- Tabs ---------- */
+
+.db-tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 40px;
+  background: var(--db-surface);
+  border-bottom: 1px solid var(--db-line);
+}
+
+.db-tab {
+  padding: 14px 18px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-family: var(--db-serif);
+  font-size: 15px;
+  color: var(--db-muted);
+  cursor: pointer;
+}
+
+.db-tab:hover {
+  color: var(--db-ink);
+}
+
+.db-tab.active {
+  color: var(--db-ink);
+  border-bottom-color: var(--db-olive);
+  font-weight: 700;
+}
+
+.db-updating {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--db-olive);
+}
+
+/* ---------- Main content ---------- */
+
+.db-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 32px 40px 64px;
+}
+
+.db-greeting {
+  font-family: var(--db-serif);
+  font-size: 32px;
+  font-weight: 400;
+  margin: 0 0 4px;
+}
+
+.db-subtle {
+  color: var(--db-muted);
+  font-size: 14px;
+  margin: 0 0 28px;
+}
+
+.db-error {
+  background: #f8e9e4;
+  color: var(--db-danger);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.db-section-title {
+  font-family: var(--db-serif);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+/* ---------- Panels & grids ---------- */
+
+.db-panel {
+  background: var(--db-surface);
+  border: 1px solid var(--db-line);
+  border-radius: 14px;
+  padding: 24px;
+}
+
+.db-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.db-panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.db-panel-head .db-section-title {
+  margin: 0;
+}
+
+/* ---------- Stats ---------- */
+
+.db-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.db-stat {
+  background: var(--db-surface);
+  border: 1px solid var(--db-line);
+  border-radius: 14px;
+  padding: 18px 20px;
+}
+
+.db-stat-label {
+  font-size: 13px;
+  color: var(--db-muted);
+}
+
+.db-stat-value {
+  font-family: var(--db-serif);
+  font-size: 30px;
+  margin-top: 6px;
+}
+
+.db-stat-note {
+  font-size: 12px;
+  color: var(--db-muted);
+  margin-top: 2px;
+}
+
+/* ---------- Forms ---------- */
+
+.db-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--db-line);
+}
+
+.db-form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.db-form-row > * {
+  flex: 1;
+}
+
+.db-field label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.db-input,
+.db-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  background: white;
+  font-family: var(--db-sans);
+  font-size: 14px;
+  color: var(--db-ink);
+}
+
+.db-input:focus,
+.db-select:focus {
+  outline: 2px solid var(--db-sage-strong);
+  border-color: var(--db-olive);
+}
+
+.db-input-small {
+  width: 80px;
+}
+
+/* ---------- Buttons ---------- */
+
+.db-btn {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--db-line);
+  background: white;
+  color: var(--db-ink);
+  font-family: var(--db-serif);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.db-btn:hover:not(:disabled) {
+  border-color: var(--db-olive);
+}
+
+.db-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.db-btn:focus-visible,
+.db-tab:focus-visible {
+  outline: 2px solid var(--db-olive);
+  outline-offset: 2px;
+}
+
+.db-btn-primary {
+  background: var(--db-olive);
+  border-color: var(--db-olive);
+  color: white;
+}
+
+.db-btn-primary:hover:not(:disabled) {
+  background: var(--db-olive-dark);
+}
+
+.db-btn-ghost {
+  background: transparent;
+}
+
+.db-btn-small {
+  padding: 4px 10px;
+  font-size: 13px;
+}
+
+.db-btn-danger:hover:not(:disabled) {
+  border-color: var(--db-danger);
+  color: var(--db-danger);
+}
+
+.db-toggle {
+  display: inline-flex;
+  border: 1px solid var(--db-line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.db-toggle button {
+  padding: 6px 14px;
+  border: none;
+  background: white;
+  font-family: var(--db-serif);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.db-toggle button.active {
+  background: var(--db-olive);
+  color: white;
+}
+
+/* ---------- Task / exam items ---------- */
+
+.db-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--db-line);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  background: white;
+}
+
+.db-item.completed .db-item-title {
+  text-decoration: line-through;
+  color: var(--db-muted);
+}
+
+.db-item-title {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.db-item-meta {
+  font-size: 12px;
+  color: var(--db-muted);
+  margin-top: 2px;
+}
+
+.db-ai-tag {
+  color: var(--db-gold);
+  font-weight: 600;
+}
+
+.db-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.db-item-edit {
+  display: block;
+}
+
+.db-empty {
+  color: var(--db-muted);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* ---------- Schedule rows (today + list view) ---------- */
+
+.db-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+.db-row.study {
+  background: var(--db-sage);
+}
+
+.db-row.commitment {
+  background: var(--db-gold-tint);
+  color: #6e5a22;
+}
+
+.db-row.done .db-row-text {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.db-daycard {
+  background: var(--db-surface);
+  border: 1px solid var(--db-line);
+  border-radius: 12px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.db-daycard.today {
+  border: 2px solid var(--db-olive);
+}
+
+.db-daycard.past {
+  opacity: 0.65;
+}
+
+.db-daycard-head {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--db-line);
+  font-family: var(--db-serif);
+}
+
+.db-daycard-body {
+  padding: 8px;
+}
+
+.db-today-badge {
+  color: var(--db-olive);
+  margin-left: 8px;
+  font-size: 13px;
+}
+
+/* ---------- Week calendar ---------- */
+
+.db-week-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.db-week-label {
+  text-align: center;
+  font-family: var(--db-serif);
+}
+
+.db-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.db-day {
+  background: var(--db-surface);
+  border: 1px solid var(--db-line);
+  border-radius: 10px;
+  min-height: 180px;
+  display: flex;
+  flex-direction: column;
+}
+
+.db-day.today {
+  border: 2px solid var(--db-olive);
+}
+
+.db-day.past {
+  opacity: 0.6;
+}
+
+.db-day-head {
+  text-align: center;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--db-line);
+}
+
+.db-day-name {
+  font-size: 12px;
+  color: var(--db-muted);
+}
+
+.db-day.today .db-day-name {
+  color: var(--db-olive);
+  font-weight: 700;
+}
+
+.db-day-date {
+  font-family: var(--db-serif);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.db-day-body {
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.db-chip {
+  border-radius: 6px;
+  padding: 6px 7px;
+  font-size: 11px;
+  word-break: break-word;
+}
+
+.db-chip.study {
+  background: var(--db-sage);
+  border-left: 3px solid var(--db-olive);
+}
+
+.db-chip.commitment {
+  background: var(--db-gold-tint);
+  border-left: 3px solid var(--db-gold);
+  color: #6e5a22;
+}
+
+.db-chip.done .db-chip-title {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.db-chip-title {
+  font-weight: 700;
+}
+
+.db-chip-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 3px;
+}
+
+.db-chip button {
+  padding: 0 6px;
+  font-size: 11px;
+  border: 1px solid var(--db-line);
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+/* ---------- Analytics bars ---------- */
+
+.db-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.db-bar-label {
+  width: 100px;
+}
+
+.db-bar-track {
+  flex: 1;
+  height: 22px;
+  background: #f1ece2;
+  border-radius: 6px;
+  position: relative;
+}
+
+.db-bar-planned,
+.db-bar-done {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: 6px;
+}
+
+.db-bar-planned {
+  background: var(--db-sage-strong);
+}
+
+.db-bar-done {
+  background: var(--db-olive);
+}
+
+.db-bar-value {
+  width: 70px;
+  text-align: right;
+}
+
+.db-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.db-legend-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+/* ---------- Next exam ---------- */
+
+.db-countdown {
+  font-family: var(--db-serif);
+  font-size: 48px;
+  color: var(--db-olive);
+  line-height: 1;
+}
+
+.db-countdown-label {
+  color: var(--db-muted);
+  font-size: 14px;
+  margin-top: 4px;
+}
+
+.db-exam-name {
+  font-family: var(--db-serif);
+  font-size: 20px;
+  margin: 16px 0 4px;
+  text-transform: capitalize;
+}
+
+/* ---------- Settings ---------- */
+
+.db-commitment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--db-line);
+  font-size: 14px;
+}
+
+.db-commitment-add {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.db-success {
+  color: var(--db-olive);
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 800px) {
+  .db-header,
+  .db-tabs,
+  .db-main {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .db-tabs {
+    overflow-x: auto;
+  }
+
+  .db-two-col,
+  .db-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .db-week-grid {
+    grid-template-columns: repeat(7, minmax(110px, 1fr));
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .db-two-col,
+  .db-stats {
+    grid-template-columns: 1fr;
+  }
+}
+/* ---------- Full-width layout (overrides Vite's default centering, only on the dashboard) ---------- */
+
+body:has(.db-page) {
+  display: block;
+  margin: 0;
+}
+
+#root:has(.db-page) {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.db-page {
+  width: 100%;
+}

@@ -16,18 +16,16 @@ function addDays(d, n) {
 }
 
 function WeekCalendar({ entries, onToggle }) {
-  const [weekOffset, setWeekOffset] = useState(0); // 0 = this week, 1 = next week, -1 = last week
+  const [weekOffset, setWeekOffset] = useState(0);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const todayStr = toDateString(today);
 
-  // Sunday of the week being shown
   const weekStart = addDays(today, -today.getDay() + weekOffset * 7);
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const weekEnd = days[6];
 
-  // Group entries by date
   const byDate = {};
   entries.forEach((e) => {
     if (!byDate[e.date]) byDate[e.date] = [];
@@ -45,27 +43,25 @@ function WeekCalendar({ entries, onToggle }) {
 
   return (
     <div>
-      {/* Week navigation */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <button onClick={() => setWeekOffset(weekOffset - 1)} style={{ padding: '4px 10px' }}>
+      <div className="db-week-nav">
+        <button className="db-btn db-btn-small" onClick={() => setWeekOffset(weekOffset - 1)}>
           ← Prev
         </button>
-        <div style={{ textAlign: 'center' }}>
+        <div className="db-week-label">
           <strong>{weekLabel}</strong>
-          <div style={{ fontSize: 12, color: '#666' }}>{weekStudyHours}h study this week</div>
+          <div className="db-item-meta">{weekStudyHours}h study this week</div>
           {weekOffset !== 0 && (
-            <button onClick={() => setWeekOffset(0)} style={{ padding: '2px 8px', marginTop: 4, fontSize: 12 }}>
+            <button className="db-btn db-btn-small" style={{ marginTop: 6 }} onClick={() => setWeekOffset(0)}>
               This week
             </button>
           )}
         </div>
-        <button onClick={() => setWeekOffset(weekOffset + 1)} style={{ padding: '4px 10px' }}>
+        <button className="db-btn db-btn-small" onClick={() => setWeekOffset(weekOffset + 1)}>
           Next →
         </button>
       </div>
 
-      {/* 7-day grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+      <div className="db-week-grid">
         {days.map((d) => {
           const dateStr = toDateString(d);
           const items = (byDate[dateStr] || []).sort(
@@ -75,77 +71,32 @@ function WeekCalendar({ entries, onToggle }) {
           const isPast = dateStr < todayStr;
 
           return (
-            <div
-              key={dateStr}
-              style={{
-                border: isToday ? '2px solid #2f6fbf' : '1px solid #ddd',
-                borderRadius: 8,
-                minHeight: 160,
-                background: isToday ? '#f5f9ff' : 'white',
-                opacity: isPast ? 0.6 : 1,
-                display: 'flex',
-                flexDirection: 'column',
-              }}
-            >
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: '6px 4px',
-                  borderBottom: '1px solid #eee',
-                  background: isToday ? '#eaf1fb' : '#fafafa',
-                  borderRadius: '8px 8px 0 0',
-                }}
-              >
-                <div style={{ fontSize: 12, color: isToday ? '#2f6fbf' : '#666' }}>{DAY_NAMES[d.getDay()]}</div>
-                <strong style={{ fontSize: 14 }}>
+            <div key={dateStr} className={`db-day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}`}>
+              <div className="db-day-head">
+                <div className="db-day-name">{DAY_NAMES[d.getDay()]}</div>
+                <div className="db-day-date">
                   {d.getDate()}.{d.getMonth() + 1}
-                </strong>
+                </div>
               </div>
 
-              <div style={{ padding: 4, display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
+              <div className="db-day-body">
                 {items.map((entry, i) =>
                   entry.type === 'commitment' ? (
-                    <div
-                      key={entry._id || i}
-                      style={{
-                        background: '#f3f0ff',
-                        color: '#5b4b8a',
-                        borderRadius: 4,
-                        padding: '4px 5px',
-                        fontSize: 11,
-                      }}
-                    >
-                      <div style={{ fontWeight: 'bold' }}>{entry.task}</div>
+                    <div key={entry._id || i} className="db-chip commitment">
+                      <div className="db-chip-title">{entry.task}</div>
                       <div>
                         {entry.startHour}:00–{entry.endHour}:00
                       </div>
                     </div>
                   ) : (
-                    <div
-                      key={entry._id || i}
-                      style={{
-                        background: entry.completed ? '#eef5ee' : '#eaf1fb',
-                        borderRadius: 4,
-                        padding: '4px 5px',
-                        fontSize: 11,
-                        wordBreak: 'break-word',
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: 'bold',
-                          textDecoration: entry.completed ? 'line-through' : 'none',
-                          opacity: entry.completed ? 0.6 : 1,
-                        }}
-                      >
-                        {entry.task}
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div key={entry._id || i} className={`db-chip study ${entry.completed ? 'done' : ''}`}>
+                      <div className="db-chip-title">{entry.task}</div>
+                      <div className="db-chip-foot">
                         <span>{entry.hours}h</span>
                         <button
                           onClick={() => onToggle(entry)}
                           title={entry.completed ? 'Undo' : 'Mark done'}
-                          style={{ padding: '0 5px', fontSize: 11 }}
+                          aria-label={entry.completed ? 'Undo' : 'Mark done'}
                         >
                           {entry.completed ? '↺' : '✓'}
                         </button>

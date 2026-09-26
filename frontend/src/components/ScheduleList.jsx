@@ -1,4 +1,4 @@
-// Shows the schedule grouped by day: one card per date with its gym + study items
+// Schedule grouped by day: one card per date with its commitments + study sessions
 
 function toDateString(d) {
   const y = d.getFullYear();
@@ -17,7 +17,6 @@ function formatDayHeader(dateStr) {
 function ScheduleList({ entries, onToggle }) {
   const today = toDateString(new Date());
 
-  // Group entries by date
   const byDate = {};
   entries.forEach((e) => {
     if (!byDate[e.date]) byDate[e.date] = [];
@@ -38,65 +37,35 @@ function ScheduleList({ entries, onToggle }) {
         const isPast = date < today;
 
         return (
-          <div
-            key={date}
-            style={{
-              border: isToday ? '2px solid #2f6fbf' : '1px solid #ddd',
-              borderRadius: 8,
-              marginBottom: 10,
-              overflow: 'hidden',
-              opacity: isPast ? 0.7 : 1,
-            }}
-          >
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '8px 12px',
-                background: isToday ? '#eaf1fb' : '#fafafa',
-                borderBottom: '1px solid #eee',
-              }}
-            >
+          <div key={date} className={`db-daycard ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}`}>
+            <div className="db-daycard-head">
               <strong>
                 {formatDayHeader(date)}
-                {isToday && <span style={{ color: '#2f6fbf', marginLeft: 8 }}>Today</span>}
+                {isToday && <span className="db-today-badge">Today</span>}
               </strong>
-              <span style={{ fontSize: 13, color: '#666' }}>
-                {studyHours > 0 ? `${studyHours}h study` : 'No study'}
-              </span>
+              <span className="db-item-meta">{studyHours > 0 ? `${studyHours}h study` : 'No study'}</span>
             </div>
-
-            {items.map((entry, i) => (
-              <div
-                key={entry._id || i}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '8px 12px',
-                  borderBottom: i < items.length - 1 ? '1px solid #f0f0f0' : 'none',
-                  background: entry.type === 'commitment' ? '#f3f0ff' : 'white',
-                  color: entry.type === 'commitment' ? '#5b4b8a' : 'inherit',
-                }}
-              >
-                <span
-                  style={{
-                    textDecoration: entry.completed ? 'line-through' : 'none',
-                    opacity: entry.completed ? 0.6 : 1,
-                  }}
+            <div className="db-daycard-body">
+              {items.map((entry, i) => (
+                <div
+                  key={entry._id || i}
+                  className={`db-row ${entry.type === 'commitment' ? 'commitment' : 'study'} ${
+                    entry.completed ? 'done' : ''
+                  }`}
                 >
-                  {entry.type === 'commitment'
-                    ? `${entry.task} · ${entry.startHour}:00–${entry.endHour}:00`
-                    : `${entry.task} · ${entry.hours}h`}
-                </span>
-                {entry.type !== 'commitment' && (
-                  <button onClick={() => onToggle(entry)} style={{ padding: '2px 8px' }}>
-                    {entry.completed ? 'Undo' : '✓ Done'}
-                  </button>
-                )}
-              </div>
-            ))}
+                  <span className="db-row-text">
+                    {entry.type === 'commitment'
+                      ? `${entry.task} · ${entry.startHour}:00–${entry.endHour}:00`
+                      : `${entry.task} · ${entry.hours}h`}
+                  </span>
+                  {entry.type !== 'commitment' && (
+                    <button className="db-btn db-btn-small" onClick={() => onToggle(entry)}>
+                      {entry.completed ? 'Undo' : '✓ Done'}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         );
       })}
