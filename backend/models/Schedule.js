@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 
+// Entries now get an _id (needed to mark a specific session as done)
 const scheduleEntrySchema = new mongoose.Schema({
   date: { type: String, required: true },
   task: { type: String, required: true },
-  hours: { type: Number, required: true }
-}, { _id: false });
+  hours: { type: Number, required: true },
+  startHour: { type: Number },
+  endHour: { type: Number },
+  type: { type: String, enum: ['study', 'commitment'], default: 'study' },
+  completed: { type: Boolean, default: false }
+});
 
 const scheduleSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
