@@ -3,6 +3,7 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
 import api from '../services/api';
 import Analytics from '../components/Analytics';
+import ScheduleList from '../components/ScheduleList';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -504,37 +505,7 @@ function Dashboard({ dbUser }) {
         {schedule?.entries && (
           <div style={{ marginTop: 12 }}>
             <h3>Your Schedule</h3>
-            {schedule.entries.map((entry, i) => (
-              <div
-                key={entry._id || i}
-                style={{
-                  padding: 8,
-                  borderBottom: '1px solid #eee',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  background: entry.type === 'commitment' ? '#f3f0ff' : 'transparent',
-                  color: entry.type === 'commitment' ? '#5b4b8a' : 'inherit',
-                }}
-              >
-                <span
-                  style={{
-                    textDecoration: entry.completed ? 'line-through' : 'none',
-                    opacity: entry.completed ? 0.6 : 1,
-                  }}
-                >
-                  <strong>{entry.date}</strong> —{' '}
-                  {entry.type === 'commitment'
-                    ? `${entry.task} (${entry.startHour}:00–${entry.endHour}:00)`
-                    : `${entry.task} (${entry.hours}h)`}
-                </span>
-                {entry.type !== 'commitment' && (
-                  <button onClick={() => toggleSessionDone(entry)} style={{ padding: '2px 8px' }}>
-                    {entry.completed ? 'Undo' : '✓ Done'}
-                  </button>
-                )}
-              </div>
-            ))}
+            <ScheduleList entries={schedule.entries} onToggle={toggleSessionDone} />
           </div>
         )}
       </div>
