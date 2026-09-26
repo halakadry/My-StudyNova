@@ -4,6 +4,8 @@ import { auth } from '../services/firebase';
 import api from '../services/api';
 import Analytics from '../components/Analytics';
 import ScheduleList from '../components/ScheduleList';
+import TaskItem from '../components/TaskItem';
+import ExamItem from '../components/ExamItem';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -112,6 +114,25 @@ function Dashboard({ dbUser }) {
     }
   };
 
+  // Edit a task (throws on failure so TaskItem stays in edit mode)
+  const saveTask = async (taskId, updates) => {
+    await api.put(`/tasks/${taskId}`, updates);
+    fetchTasks();
+    refreshSchedule();
+  };
+
+  const deleteTask = async (taskId) => {
+    if (!window.confirm('Delete this task?')) return;
+    try {
+      await api.delete(`/tasks/${taskId}`);
+      fetchTasks();
+      refreshSchedule();
+    } catch (err) {
+      console.error(err);
+      setError('Could not delete task.');
+    }
+  };
+
   const handleAddExam = async (e) => {
     e.preventDefault();
     setError('');
@@ -132,7 +153,15 @@ function Dashboard({ dbUser }) {
     }
   };
 
+  // Edit an exam (throws on failure so ExamItem stays in edit mode)
+  const saveExam = async (examId, updates) => {
+    await api.put(`/exams/${examId}`, updates);
+    fetchExams();
+    refreshSchedule();
+  };
+
   const deleteExam = async (examId) => {
+    if (!window.confirm('Delete this exam?')) return;
     try {
       await api.delete(`/exams/${examId}`);
       fetchExams();
@@ -311,33 +340,14 @@ function Dashboard({ dbUser }) {
           <h3>My tasks</h3>
           {tasks.length === 0 && <p>No tasks yet.</p>}
           {tasks.map((task) => (
-            <div
+            <TaskItem
               key={task._id}
-              style={{
-                border: '1px solid #eee',
-                borderRadius: 6,
-                padding: 10,
-                marginBottom: 8,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <strong>{task.title}</strong>
-                <div style={{ fontSize: 12, color: '#666' }}>
-                  Due {new Date(task.deadline).toLocaleDateString()} · {task.difficulty} · {task.durationHours}h
-                  {task.hoursEstimated && <span style={{ color: '#2f6fbf' }}> (AI est.)</span>}
-                </div>
-              </div>
-              <button
-                onClick={() => toggleComplete(task)}
-                disabled={scheduleLoading}
-                style={{ padding: '4px 8px' }}
-              >
-                {task.status === 'completed' ? 'Completed' : 'Mark done'}
-              </button>
-            </div>
+              task={task}
+              disabled={scheduleLoading}
+              onToggle={toggleComplete}
+              onSave={saveTask}
+              onDelete={deleteTask}
+            />
           ))}
         </div>
       </div>
@@ -386,32 +396,13 @@ function Dashboard({ dbUser }) {
           <h3>My exams</h3>
           {exams.length === 0 && <p>No exams yet.</p>}
           {exams.map((exam) => (
-            <div
+            <ExamItem
               key={exam._id}
-              style={{
-                border: '1px solid #eee',
-                borderRadius: 6,
-                padding: 10,
-                marginBottom: 8,
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <div>
-                <strong>{exam.subject}</strong>
-                <div style={{ fontSize: 12, color: '#666' }}>
-                  {new Date(exam.date).toLocaleDateString()} · {exam.difficulty} · ~{exam.prepHoursNeeded}h prep
-                </div>
-              </div>
-              <button
-                onClick={() => deleteExam(exam._id)}
-                disabled={scheduleLoading}
-                style={{ padding: '4px 8px' }}
-              >
-                Delete
-              </button>
-            </div>
+              exam={exam}
+              disabled={scheduleLoading}
+              onSave={saveExam}
+              onDelete={deleteExam}
+            />
           ))}
         </div>
       </div>

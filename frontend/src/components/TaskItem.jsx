@@ -1,0 +1,102 @@
+import { useState } from 'react';
+
+function TaskItem({ task, disabled, onToggle, onSave, onDelete }) {
+  const [editing, setEditing] = useState(false);
+  const [form, setForm] = useState({});
+  const [saving, setSaving] = useState(false);
+
+  const startEdit = () => {
+    setForm({
+      title: task.title,
+      deadline: task.deadline.slice(0, 10),
+      difficulty: task.difficulty,
+      durationHours: task.durationHours,
+    });
+    setEditing(true);
+  };
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await onSave(task._id, { ...form, durationHours: Number(form.durationHours) });
+      setEditing(false);
+    } catch (err) {
+      alert('Could not save task.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const boxStyle = { border: '1px solid #eee', borderRadius: 6, padding: 10, marginBottom: 8 };
+
+  if (editing) {
+    return (
+      <div style={boxStyle}>
+        <input
+          type="text"
+          value={form.title}
+          onChange={(e) => setForm({ ...form, title: e.target.value })}
+          style={{ width: '100%', padding: 6, marginBottom: 6 }}
+        />
+        <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+          <input
+            type="date"
+            value={form.deadline}
+            onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+            style={{ flex: 1, padding: 6 }}
+          />
+          <select
+            value={form.difficulty}
+            onChange={(e) => setForm({ ...form, difficulty: e.target.value })}
+            style={{ padding: 6 }}
+          >
+            <option>Easy</option>
+            <option>Medium</option>
+            <option>Hard</option>
+          </select>
+          <input
+            type="number"
+            min="1"
+            value={form.durationHours}
+            onChange={(e) => setForm({ ...form, durationHours: e.target.value })}
+            style={{ width: 60, padding: 6 }}
+          />
+          <span style={{ alignSelf: 'center', fontSize: 12 }}>h</span>
+        </div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          <button onClick={save} disabled={saving} style={{ padding: '4px 10px' }}>
+            {saving ? 'Saving...' : 'Save'}
+          </button>
+          <button onClick={() => setEditing(false)} disabled={saving} style={{ padding: '4px 10px' }}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ ...boxStyle, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div>
+        <strong>{task.title}</strong>
+        <div style={{ fontSize: 12, color: '#666' }}>
+          Due {new Date(task.deadline).toLocaleDateString()} · {task.difficulty} · {task.durationHours}h
+          {task.hoursEstimated && <span style={{ color: '#2f6fbf' }}> (AI est.)</span>}
+        </div>
+      </div>
+      <div style={{ display: 'flex', gap: 4 }}>
+        <button onClick={() => onToggle(task)} disabled={disabled} style={{ padding: '4px 8px' }}>
+          {task.status === 'completed' ? 'Completed' : 'Mark done'}
+        </button>
+        <button onClick={startEdit} disabled={disabled} style={{ padding: '4px 8px' }}>
+          Edit
+        </button>
+        <button onClick={() => onDelete(task._id)} disabled={disabled} style={{ padding: '4px 8px' }}>
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default TaskItem;

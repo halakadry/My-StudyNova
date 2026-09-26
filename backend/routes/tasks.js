@@ -39,18 +39,40 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-// Update a task
+// Update a task (status, or edit title/deadline/difficulty/hours)
 router.put('/:id', async (req, res) => {
   try {
-    const task = await Task.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!task) return res.status(404).json({ error: 'Task not found' });
+    const existing = await Task.findById(req.params.id);
+    if (!existing) return res.status(404).json({ error: 'Task not found' });
 
-    // If status changed, trigger re-scheduling
-    if (req.body.status) {
-      const { buildAndSaveSchedule } = require('../routes/schedule');
+    const updates = { ...req.body };
+
+    // User changed the hours by hand -> no longer an AI estimate
+    if (updates.durationHours !== undefined && Number(updates.durationHours) !== existing.durationHours) {
+      updates.durationHours = Number(updates.durationHours);
+      updates.hoursEstimated = false;
     }
 
+    // Recalculate priority if anything in the formula changed
+    if (updates.deadline || updates.difficulty || updates.durationHours !== undefined) {
+      const user = await User.findById(existing.userId);
+      const merged = { ...existing.toObject(), ...updates };
+      updates.priorityScore = calculatePriorityScore(merged, user?.availableHoursPerDay || 4);
+    }
+
+    const task = await Task.findByIdAndUpdate(req.params.id, updates, { returnDocument: 'after' });
     res.json(task);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Delete a task
+router.delete('/:id', async (req, res) => {
+  try {
+    const task = await Task.findByIdAndDelete(req.params.id);
+    if (!task) return res.status(404).json({ error: 'Task not found' });
+    res.json({ message: 'Task deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
