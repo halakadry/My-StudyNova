@@ -61,6 +61,20 @@ function Dashboard({ dbUser }) {
     }
   };
 
+  // Dynamic re-scheduling: called automatically after any task/exam change
+  const refreshSchedule = async () => {
+    setScheduleLoading(true);
+    try {
+      const res = await api.post('/schedule/reschedule', { userId: dbUser._id });
+      setSchedule(res.data);
+    } catch (err) {
+      // e.g. nothing left to schedule: just show whatever is saved
+      await fetchSchedule();
+    } finally {
+      setScheduleLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (dbUser?._id) {
       fetchTasks();
@@ -90,6 +104,7 @@ function Dashboard({ dbUser }) {
       setDifficulty('Easy');
       setDurationHours('');
       fetchTasks();
+      refreshSchedule();
     } catch (err) {
       setError('Could not add task.');
     } finally {
@@ -111,6 +126,7 @@ function Dashboard({ dbUser }) {
       setExamDate('');
       setExamDifficulty('Medium');
       fetchExams();
+      refreshSchedule();
     } catch (err) {
       setError('Could not add exam.');
     }
@@ -120,6 +136,7 @@ function Dashboard({ dbUser }) {
     try {
       await api.delete(`/exams/${examId}`);
       fetchExams();
+      refreshSchedule();
     } catch (err) {
       console.error(err);
     }
@@ -131,6 +148,7 @@ function Dashboard({ dbUser }) {
         status: task.status === 'completed' ? 'pending' : 'completed',
       });
       fetchTasks();
+      refreshSchedule();
     } catch (err) {
       console.error(err);
     }
@@ -279,7 +297,11 @@ function Dashboard({ dbUser }) {
               />
             </div>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            <button type="submit" disabled={taskAdding} style={{ width: '100%', padding: 10 }}>
+            <button
+              type="submit"
+              disabled={taskAdding || scheduleLoading}
+              style={{ width: '100%', padding: 10 }}
+            >
               {taskAdding ? (durationHours === '' ? 'Estimating hours...' : 'Adding...') : 'Add task'}
             </button>
           </form>
@@ -308,7 +330,11 @@ function Dashboard({ dbUser }) {
                   {task.hoursEstimated && <span style={{ color: '#2f6fbf' }}> (AI est.)</span>}
                 </div>
               </div>
-              <button onClick={() => toggleComplete(task)} style={{ padding: '4px 8px' }}>
+              <button
+                onClick={() => toggleComplete(task)}
+                disabled={scheduleLoading}
+                style={{ padding: '4px 8px' }}
+              >
                 {task.status === 'completed' ? 'Completed' : 'Mark done'}
               </button>
             </div>
@@ -350,7 +376,7 @@ function Dashboard({ dbUser }) {
                 <option>Hard</option>
               </select>
             </div>
-            <button type="submit" style={{ width: '100%', padding: 10 }}>
+            <button type="submit" disabled={scheduleLoading} style={{ width: '100%', padding: 10 }}>
               Add exam
             </button>
           </form>
@@ -378,7 +404,11 @@ function Dashboard({ dbUser }) {
                   {new Date(exam.date).toLocaleDateString()} · {exam.difficulty} · ~{exam.prepHoursNeeded}h prep
                 </div>
               </div>
-              <button onClick={() => deleteExam(exam._id)} style={{ padding: '4px 8px' }}>
+              <button
+                onClick={() => deleteExam(exam._id)}
+                disabled={scheduleLoading}
+                style={{ padding: '4px 8px' }}
+              >
                 Delete
               </button>
             </div>
@@ -499,7 +529,7 @@ function Dashboard({ dbUser }) {
 
       <div style={{ marginTop: 24 }}>
         <button onClick={generateSchedule} disabled={scheduleLoading} style={{ padding: 10 }}>
-          {scheduleLoading ? 'Generating...' : 'Generate AI Schedule'}
+          {scheduleLoading ? 'Updating schedule...' : 'Generate AI Schedule'}
         </button>
 
         {schedule?.isOverloaded && (

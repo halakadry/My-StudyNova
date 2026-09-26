@@ -54,12 +54,16 @@ async function buildAndSaveSchedule(userId) {
     return (a.type === 'commitment' ? 0 : 1) - (b.type === 'commitment' ? 0 : 1);
   });
 
-  // Keep past study sessions (done or not) as history for the analytics dashboard
+  // Keep history for analytics: all past study sessions + sessions already marked done today
   const today = todayString();
   const oldSchedule = await Schedule.findOne({ userId });
   const history = oldSchedule
     ? oldSchedule.entries
-        .filter((e) => e.date < today && e.type !== 'commitment')
+        .filter(
+          (e) =>
+            e.type !== 'commitment' &&
+            (e.date < today || (e.date === today && e.completed))
+        )
         .map((e) => e.toObject())
     : [];
 
