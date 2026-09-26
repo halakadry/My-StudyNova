@@ -13,6 +13,7 @@ function Dashboard({ dbUser }) {
   const [deadline, setDeadline] = useState('');
   const [difficulty, setDifficulty] = useState('Easy');
   const [durationHours, setDurationHours] = useState('');
+  const [taskAdding, setTaskAdding] = useState(false);
   const [error, setError] = useState('');
 
   const [exams, setExams] = useState([]);
@@ -74,13 +75,15 @@ function Dashboard({ dbUser }) {
   const handleAddTask = async (e) => {
     e.preventDefault();
     setError('');
+    setTaskAdding(true);
     try {
       await api.post('/tasks', {
         userId: dbUser._id,
         title,
         deadline,
         difficulty,
-        durationHours: Number(durationHours),
+        // Empty = let the AI estimate the hours
+        durationHours: durationHours === '' ? null : Number(durationHours),
       });
       setTitle('');
       setDeadline('');
@@ -89,6 +92,8 @@ function Dashboard({ dbUser }) {
       fetchTasks();
     } catch (err) {
       setError('Could not add task.');
+    } finally {
+      setTaskAdding(false);
     }
   };
 
@@ -266,16 +271,16 @@ function Dashboard({ dbUser }) {
             <div style={{ marginBottom: 8 }}>
               <input
                 type="number"
-                placeholder="Estimated hours"
+                min="1"
+                placeholder="Estimated hours (optional — leave empty for AI estimate)"
                 value={durationHours}
                 onChange={(e) => setDurationHours(e.target.value)}
-                required
                 style={{ width: '100%', padding: 8 }}
               />
             </div>
             {error && <p style={{ color: 'red' }}>{error}</p>}
-            <button type="submit" style={{ width: '100%', padding: 10 }}>
-              Add task
+            <button type="submit" disabled={taskAdding} style={{ width: '100%', padding: 10 }}>
+              {taskAdding ? (durationHours === '' ? 'Estimating hours...' : 'Adding...') : 'Add task'}
             </button>
           </form>
         </div>
@@ -300,6 +305,7 @@ function Dashboard({ dbUser }) {
                 <strong>{task.title}</strong>
                 <div style={{ fontSize: 12, color: '#666' }}>
                   Due {new Date(task.deadline).toLocaleDateString()} · {task.difficulty} · {task.durationHours}h
+                  {task.hoursEstimated && <span style={{ color: '#2f6fbf' }}> (AI est.)</span>}
                 </div>
               </div>
               <button onClick={() => toggleComplete(task)} style={{ padding: '4px 8px' }}>

@@ -5,6 +5,9 @@ const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const MIN_SESSION_HOURS = 2; // no tiny sessions
 const MAX_SESSION_HOURS = 4;
 
+// Used when the AI can't estimate task hours
+const DEFAULT_TASK_HOURS = { Easy: 3, Medium: 6, Hard: 10 };
+
 // Local YYYY-MM-DD (avoids UTC shifting the date after midnight in Israel)
 function toDateString(d) {
   const y = d.getFullYear();
@@ -39,6 +42,34 @@ function getPrepWindow(examDate, prepHours) {
 
   const days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
   return { start: toDateString(start), end: toDateString(end), days };
+}
+
+// Estimates total hours for a task from its title + difficulty. Never throws.
+async function estimateTaskHours(title, difficulty) {
+  const fallback = DEFAULT_TASK_HOURS[difficulty] || 6;
+
+  const prompt = `You estimate how long university assignments take for a typical student.
+Task: "${title}"
+Difficulty: ${difficulty}
+
+Estimate the total hours of work needed to fully complete this task.
+Return ONLY a JSON object, with no additional text, in this exact format:
+{"hours": number}
+The number must be a whole number between ${MIN_SESSION_HOURS} and 40.`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: 'gemini-flash-lite-latest',
+      contents: prompt
+    });
+    const cleaned = response.text.replace(/```json|```/g, '').trim();
+    const hours = Math.round(Number(JSON.parse(cleaned).hours));
+    if (!hours || hours < MIN_SESSION_HOURS || hours > 40) return fallback;
+    return hours;
+  } catch (err) {
+    console.error('Task hour estimation failed, using default:', err.message);
+    return fallback;
+  }
 }
 
 function buildPrompt(tasks, exams, weeklyAvailability, constraints) {
@@ -125,4 +156,4 @@ async function generateSchedule(tasks, exams, weeklyAvailability, constraints, r
   }
 }
 
-module.exports = { generateSchedule };
+module.exports = { generateSchedule, estimateTaskHours };

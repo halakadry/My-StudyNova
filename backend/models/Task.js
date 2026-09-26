@@ -6,6 +6,7 @@ const taskSchema = new mongoose.Schema({
   deadline: { type: Date, required: true },
   difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'], default: 'Medium' },
   durationHours: { type: Number, required: true },
+  hoursEstimated: { type: Boolean, default: false }, // true = hours were estimated by AI
   status: { type: String, enum: ['pending', 'completed'], default: 'pending' },
   priorityScore: { type: Number, default: 0 }
 }, { timestamps: true });
