@@ -72,15 +72,15 @@ The number must be a whole number between ${MIN_SESSION_HOURS} and 40.`;
   }
 }
 
-function buildPrompt(tasks, exams, weeklyAvailability, constraints) {
+function buildPrompt(tasks, exams, weeklyAvailability, constraints, todayHoursLeft) {
   const tasksText = tasks
-    .map(t => `- ${t.title} | Deadline: ${toDateString(t.deadline)} | Difficulty: ${t.difficulty} | Duration: ${t.durationHours} hours`)
+    .map(t => `- ${t.title} | Deadline: ${toDateString(t.deadline)} | Difficulty: ${t.difficulty} | Hours still to do: ${t.durationHours}`)
     .join('\n') || 'None';
 
   const examsText = (exams || [])
     .map(e => {
       const w = getPrepWindow(e.date, e.prepHoursNeeded);
-      return `- "${e.subject} exam prep" | Exam date: ${toDateString(e.date)} | Difficulty: ${e.difficulty} | Total prep: ${e.prepHoursNeeded} hours | PREP WINDOW: ${w.start} to ${w.end} (${w.days} days)`;
+      return `- "${e.subject} exam prep" | Exam date: ${toDateString(e.date)} | Difficulty: ${e.difficulty} | Prep hours still to do: ${e.prepHoursNeeded} | PREP WINDOW: ${w.start} to ${w.end} (${w.days} days)`;
     })
     .join('\n') || 'None';
 
@@ -94,16 +94,22 @@ function buildPrompt(tasks, exams, weeklyAvailability, constraints) {
 
   const today = toDateString(new Date());
 
+  const todayRule = todayHoursLeft >= MIN_SESSION_HOURS
+    ? `TODAY (${today}) IS PARTLY OVER: schedule AT MOST ${todayHoursLeft} hours of study in total on ${today}. Put the rest on the following days.`
+    : `TODAY (${today}) IS ALMOST OVER: do NOT schedule anything on ${today}. Start from the next day.`;
+
   return `You are a study planner. Today's date is ${today}. Never schedule any date before ${today}.
 
 Real available study hours per day of the week (already accounts for sleep, commuting, and recurring commitments like gym or classes):
 ${availabilityText}
 
+${todayRule}
+
 Other constraints: ${constraintsText}
 
 TASKS (ordered by priority):
 ${tasksText}
-Rules for tasks: start early and split the hours into a few sessions on different days before the deadline. Every task must be fully scheduled on or before its deadline.
+Rules for tasks: start early and split the hours into a few sessions on different days before the deadline. Every task must be fully scheduled on or before its deadline. Schedule exactly the "hours still to do".
 
 EXAMS:
 ${examsText}
@@ -112,7 +118,7 @@ Rules for exams (follow strictly):
 2. Spread the sessions across the whole window. Do NOT finish early and leave the last days before the exam empty.
 3. The LAST prep session must be on the window's end date (the day before the exam), and it should be one of the longest sessions.
 4. It is fine to skip days inside the window — fewer, longer sessions are better than many short ones.
-5. The prep hours for each exam must add up exactly to its total prep hours.
+5. The prep hours for each exam must add up exactly to its "prep hours still to do".
 6. Use the exam's task name exactly as written in quotes (e.g. "math exam prep").
 
 SESSION LENGTH RULES (apply to every entry, tasks and exams):
@@ -131,8 +137,8 @@ Return ONLY a JSON object, with no additional text, in this exact format:
 }`;
 }
 
-async function generateSchedule(tasks, exams, weeklyAvailability, constraints, retries = 3) {
-  const prompt = buildPrompt(tasks, exams, weeklyAvailability, constraints);
+async function generateSchedule(tasks, exams, weeklyAvailability, constraints, todayHoursLeft = 24, retries = 3) {
+  const prompt = buildPrompt(tasks, exams, weeklyAvailability, constraints, todayHoursLeft);
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {

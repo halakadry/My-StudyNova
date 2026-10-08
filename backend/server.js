@@ -3,19 +3,31 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const { initializeApp, cert } = require('firebase-admin/app');
-const serviceAccount = require('./serviceAccountKey.json');
+
+// Online (Render): key comes from the FIREBASE_SERVICE_ACCOUNT setting.
+// Locally: key comes from serviceAccountKey.json (never pushed to GitHub).
+const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT
+  ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+  : require('./serviceAccountKey.json');
 
 initializeApp({
   credential: cert(serviceAccount)
 });
 
 const app = express();
-app.use(cors());
+
+// Online: only the Vercel site may call the backend. Locally: anything is allowed.
+app.use(cors({
+  origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : '*'
+}));
 app.use(express.json());
+
 app.use('/api/users', require('./routes/users'));
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/schedule', require('./routes/schedule'));
+app.use('/api/chat', require('./routes/chat'));
+
 app.get('/', (req, res) => {
   res.send('StudyNova backend is running');
 });

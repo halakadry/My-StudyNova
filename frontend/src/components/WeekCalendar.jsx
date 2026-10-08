@@ -36,10 +36,12 @@ function WeekCalendar({ entries, onToggle }) {
     weekEnd.getMonth() + 1
   }.${weekEnd.getFullYear()}`;
 
-  const weekStudyHours = days
+  // Split the week's study hours into "left to study" and "already done"
+  const weekStudy = days
     .flatMap((d) => byDate[toDateString(d)] || [])
-    .filter((e) => e.type !== 'commitment')
-    .reduce((sum, e) => sum + e.hours, 0);
+    .filter((e) => e.type !== 'commitment');
+  const weekLeft = weekStudy.filter((e) => !e.completed).reduce((sum, e) => sum + e.hours, 0);
+  const weekDone = weekStudy.filter((e) => e.completed).reduce((sum, e) => sum + e.hours, 0);
 
   return (
     <div>
@@ -49,7 +51,9 @@ function WeekCalendar({ entries, onToggle }) {
         </button>
         <div className="db-week-label">
           <strong>{weekLabel}</strong>
-          <div className="db-item-meta">{weekStudyHours}h study this week</div>
+          <div className="db-item-meta">
+            {weekLeft}h to study · {weekDone}h done
+          </div>
           {weekOffset !== 0 && (
             <button className="db-btn db-btn-small" style={{ marginTop: 6 }} onClick={() => setWeekOffset(0)}>
               This week

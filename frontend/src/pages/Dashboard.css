@@ -707,3 +707,94 @@ body:has(.db-page) {
 .db-page {
   width: 100%;
 }
+/* ---------- Assistant chat ---------- */
+
+.db-chat {
+  display: flex;
+  flex-direction: column;
+  height: 70vh;
+  min-height: 420px;
+}
+
+.db-chat-log {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 4px 2px 12px;
+}
+
+.db-msg {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.db-msg.user {
+  align-self: flex-end;
+  background: var(--db-olive);
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.db-msg.assistant {
+  align-self: flex-start;
+  background: var(--db-sage);
+  border-bottom-left-radius: 4px;
+}
+
+.db-msg.error {
+  background: #f8e9e4;
+  color: var(--db-danger);
+}
+
+.db-msg-typing {
+  color: var(--db-muted);
+  font-style: italic;
+}
+
+.db-chat-empty {
+  margin: auto;
+  text-align: center;
+  color: var(--db-muted);
+  max-width: 520px;
+}
+
+.db-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.db-suggestion {
+  padding: 8px 14px;
+  border: 1px solid var(--db-line);
+  border-radius: 999px;
+  background: white;
+  color: var(--db-ink);
+  font-family: var(--db-sans);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.db-suggestion:hover {
+  border-color: var(--db-olive);
+}
+
+.db-chat-form {
+  display: flex;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--db-line);
+}
+
+.db-chat-form .db-input {
+  flex: 1;
+}

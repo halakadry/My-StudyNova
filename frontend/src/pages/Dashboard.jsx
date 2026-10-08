@@ -7,6 +7,7 @@ import ScheduleList from '../components/ScheduleList';
 import WeekCalendar from '../components/WeekCalendar';
 import TaskItem from '../components/TaskItem';
 import ExamItem from '../components/ExamItem';
+import ChatAssistant from '../components/ChatAssistant';
 import './Dashboard.css';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -16,6 +17,7 @@ const TABS = [
   { id: 'work', label: 'Tasks & Exams' },
   { id: 'schedule', label: 'Schedule' },
   { id: 'analytics', label: 'Analytics' },
+  { id: 'assistant', label: 'Assistant' },
   { id: 'settings', label: 'Settings' },
 ];
 
@@ -75,11 +77,15 @@ function Dashboard({ dbUser }) {
     }
   };
 
-  // Load the saved schedule when the page opens (404 = no schedule yet, that's fine)
-  const fetchSchedule = async () => {
+  // Load the saved schedule. If it was last built before today, rebuild it so missed work moves forward.
+  const fetchSchedule = async (allowAutoRefresh = true) => {
     try {
       const res = await api.get(`/schedule/${dbUser._id}`);
       setSchedule(res.data);
+      const builtOn = toDateString(new Date(res.data.updatedAt));
+      if (allowAutoRefresh && builtOn < toDateString(new Date())) {
+        refreshSchedule();
+      }
     } catch (err) {
       setSchedule(null);
     }
@@ -92,7 +98,7 @@ function Dashboard({ dbUser }) {
       const res = await api.post('/schedule/reschedule', { userId: dbUser._id });
       setSchedule(res.data);
     } catch (err) {
-      await fetchSchedule();
+      await fetchSchedule(false);
     } finally {
       setScheduleLoading(false);
     }
@@ -587,6 +593,11 @@ function Dashboard({ dbUser }) {
               ))}
           </div>
         )}
+
+        {/* ========== ASSISTANT (stays mounted so the chat isn't lost when switching tabs) ========== */}
+        <div style={{ display: tab === 'assistant' ? 'block' : 'none' }}>
+          <ChatAssistant userId={dbUser._id} />
+        </div>
 
         {/* ========== ANALYTICS ========== */}
         {tab === 'analytics' && <Analytics tasks={tasks} schedule={schedule} />}
