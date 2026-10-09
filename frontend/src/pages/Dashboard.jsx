@@ -8,18 +8,16 @@ import WeekCalendar from '../components/WeekCalendar';
 import TaskItem from '../components/TaskItem';
 import ExamItem from '../components/ExamItem';
 import ChatAssistant from '../components/ChatAssistant';
+import Summarizer from '../components/Summarizer';
+import LanguageMenu from '../components/LanguageMenu';
+import SupportModal from '../components/SupportModal';
+import { useLanguage } from '../i18n/useLanguage';
 import './Dashboard.css';
 
+// Day values stay in English (the backend uses them); only the labels are translated
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-const TABS = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'work', label: 'Tasks & Exams' },
-  { id: 'schedule', label: 'Schedule' },
-  { id: 'analytics', label: 'Analytics' },
-  { id: 'assistant', label: 'Assistant' },
-  { id: 'settings', label: 'Settings' },
-];
+const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
+const TAB_IDS = ['overview', 'work', 'schedule', 'analytics', 'assistant', 'summarize', 'settings'];
 
 function toDateString(d) {
   const y = d.getFullYear();
@@ -28,8 +26,29 @@ function toDateString(d) {
   return `${y}-${m}-${day}`;
 }
 
+function MailIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="m3 7 9 6 9-6" />
+    </svg>
+  );
+}
+
 function Dashboard({ dbUser }) {
+  const { t, lang, dir, locale } = useLanguage();
   const [tab, setTab] = useState('overview');
+
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [supportPrefill, setSupportPrefill] = useState('');
 
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
@@ -56,6 +75,15 @@ function Dashboard({ dbUser }) {
   const [newCommitmentStart, setNewCommitmentStart] = useState('');
   const [newCommitmentEnd, setNewCommitmentEnd] = useState('');
   const [settingsSaved, setSettingsSaved] = useState(false);
+
+  // Day name in the chosen language (Jan 1 2023 was a Sunday)
+  const dayLabel = (day) =>
+    new Date(2023, 0, 1 + DAYS.indexOf(day)).toLocaleDateString(locale, { weekday: 'long' });
+
+  const openSupport = (prefillText = '') => {
+    setSupportPrefill(prefillText);
+    setSupportOpen(true);
+  };
 
   /* ---------- Data loading ---------- */
 
@@ -136,7 +164,7 @@ function Dashboard({ dbUser }) {
       fetchTasks();
       refreshSchedule();
     } catch (err) {
-      setError('Could not add task.');
+      setError(t('errAddTask'));
     } finally {
       setTaskAdding(false);
     }
@@ -149,13 +177,13 @@ function Dashboard({ dbUser }) {
   };
 
   const deleteTask = async (taskId) => {
-    if (!window.confirm('Delete this task?')) return;
+    if (!window.confirm(t('confirmDeleteTask'))) return;
     try {
       await api.delete(`/tasks/${taskId}`);
       fetchTasks();
       refreshSchedule();
     } catch (err) {
-      setError('Could not delete task.');
+      setError(t('errDeleteTask'));
     }
   };
 
@@ -189,7 +217,7 @@ function Dashboard({ dbUser }) {
       fetchExams();
       refreshSchedule();
     } catch (err) {
-      setError('Could not add exam.');
+      setError(t('errAddExam'));
     }
   };
 
@@ -200,7 +228,7 @@ function Dashboard({ dbUser }) {
   };
 
   const deleteExam = async (examId) => {
-    if (!window.confirm('Delete this exam?')) return;
+    if (!window.confirm(t('confirmDeleteExam'))) return;
     try {
       await api.delete(`/exams/${examId}`);
       fetchExams();
@@ -219,7 +247,7 @@ function Dashboard({ dbUser }) {
       const res = await api.post('/schedule/generate', { userId: dbUser._id });
       setSchedule(res.data);
     } catch (err) {
-      setError('Could not generate schedule. Add a task or exam first.');
+      setError(t('errGenerate'));
     } finally {
       setScheduleLoading(false);
     }
@@ -230,7 +258,7 @@ function Dashboard({ dbUser }) {
       const res = await api.patch(`/schedule/entry/${entry._id}/toggle`);
       setSchedule(res.data);
     } catch (err) {
-      setError('Could not update session. Try clicking Generate AI Schedule once.');
+      setError(t('errSession'));
     }
   };
 
@@ -267,7 +295,7 @@ function Dashboard({ dbUser }) {
       });
       setSettingsSaved(true);
     } catch (err) {
-      setError('Could not save settings.');
+      setError(t('errSaveSettings'));
     }
   };
 
@@ -276,7 +304,7 @@ function Dashboard({ dbUser }) {
   const now = new Date();
   const todayStr = toDateString(now);
   const hour = now.getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const greeting = hour < 12 ? t('goodMorning') : hour < 18 ? t('goodAfternoon') : t('goodEvening');
 
   // Name: from MongoDB, else Firebase/Google display name, else the start of the email
   const rawName =
@@ -286,15 +314,15 @@ function Dashboard({ dbUser }) {
   const displayName = rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1) : '';
   const firstName = displayName.split(' ')[0];
 
-  const todayLabel = now.toLocaleDateString('en-GB', {
+  const todayLabel = now.toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   });
 
-  const completed = tasks.filter((t) => t.status === 'completed').length;
-  const pending = tasks.filter((t) => t.status === 'pending').length;
+  const completed = tasks.filter((tk) => tk.status === 'completed').length;
+  const pending = tasks.filter((tk) => tk.status === 'pending').length;
 
   const oneWeekFromNow = new Date();
   oneWeekFromNow.setDate(oneWeekFromNow.getDate() + 7);
@@ -322,7 +350,7 @@ function Dashboard({ dbUser }) {
   /* ---------- Render ---------- */
 
   return (
-    <div className="db-page">
+    <div className="db-page" dir={dir} lang={lang}>
       <header className="db-header">
         <div className="db-logo">
           <svg viewBox="0 0 80 80" fill="none" aria-hidden="true">
@@ -331,35 +359,39 @@ function Dashboard({ dbUser }) {
             <path d="M40 65C29 58 17 57 5 59" stroke="#59674A" strokeWidth="2" />
             <path d="M40 65C51 58 63 57 75 59" stroke="#947A32" strokeWidth="2" />
           </svg>
-          <div className="db-logo-text">
+          <div className="db-logo-text" dir="ltr">
             Study<span>Nova</span>
           </div>
         </div>
         <div className="db-header-right">
+          <button type="button" className="db-pill-btn" onClick={() => openSupport()}>
+            <MailIcon />
+            {t('contactSupport')}
+          </button>
+          <LanguageMenu />
           {displayName && <span className="db-user">{displayName}</span>}
           <button className="db-btn db-btn-ghost db-btn-small" onClick={() => signOut(auth)}>
-            Log out
+            {t('logOut')}
           </button>
         </div>
       </header>
 
       <nav className="db-tabs">
-        {TABS.map((t) => (
-          <button
-            key={t.id}
-            className={`db-tab ${tab === t.id ? 'active' : ''}`}
-            onClick={() => setTab(t.id)}
-          >
-            {t.label}
+        {TAB_IDS.map((id) => (
+          <button key={id} className={`db-tab ${tab === id ? 'active' : ''}`} onClick={() => setTab(id)}>
+            {t(id)}
           </button>
         ))}
-        {scheduleLoading && <span className="db-updating">Updating schedule…</span>}
+        {scheduleLoading && <span className="db-updating">{t('updatingSchedule')}</span>}
       </nav>
 
       <main className="db-main">
         {error && (
-          <div className="db-error" role="alert">
-            {error}
+          <div className="db-error db-error-row" role="alert">
+            <span>{error}</span>
+            <button type="button" className="db-btn db-btn-small" onClick={() => openSupport(error)}>
+              {t('reportThis')}
+            </button>
           </div>
         )}
 
@@ -374,38 +406,38 @@ function Dashboard({ dbUser }) {
 
             <div className="db-stats">
               <div className="db-stat">
-                <div className="db-stat-label">Study today</div>
-                <div className="db-stat-value">{studyToday}h</div>
+                <div className="db-stat-label">{t('studyToday')}</div>
+                <div className="db-stat-value">{t('hours', { n: studyToday })}</div>
                 <div className="db-stat-note">
-                  {todayEntries.filter((e) => e.type !== 'commitment').length} session(s)
+                  {t('sessionsCount', { n: todayEntries.filter((e) => e.type !== 'commitment').length })}
                 </div>
               </div>
               <div className="db-stat">
-                <div className="db-stat-label">Pending tasks</div>
+                <div className="db-stat-label">{t('pendingTasks')}</div>
                 <div className="db-stat-value">{pending}</div>
-                <div className="db-stat-note">{completed} completed</div>
+                <div className="db-stat-note">{t('completedCount', { n: completed })}</div>
               </div>
               <div className="db-stat">
-                <div className="db-stat-label">Upcoming exams</div>
+                <div className="db-stat-label">{t('upcomingExams')}</div>
                 <div className="db-stat-value">{exams.length}</div>
-                <div className="db-stat-note">{examsThisWeek} this week</div>
+                <div className="db-stat-note">{t('thisWeekCount', { n: examsThisWeek })}</div>
               </div>
               <div className="db-stat">
-                <div className="db-stat-label">Total tasks</div>
+                <div className="db-stat-label">{t('totalTasks')}</div>
                 <div className="db-stat-value">{tasks.length}</div>
-                <div className="db-stat-note">all time</div>
+                <div className="db-stat-note">{t('allTime')}</div>
               </div>
             </div>
 
             <div className="db-two-col">
               <div className="db-panel">
                 <div className="db-panel-head">
-                  <h2 className="db-section-title">Today's plan</h2>
+                  <h2 className="db-section-title">{t('todaysPlan')}</h2>
                   <button className="db-btn db-btn-small" onClick={() => setTab('schedule')}>
-                    Full schedule
+                    {t('fullSchedule')}
                   </button>
                 </div>
-                {todayEntries.length === 0 && <p className="db-empty">Nothing scheduled for today.</p>}
+                {todayEntries.length === 0 && <p className="db-empty">{t('nothingToday')}</p>}
                 {todayEntries.map((entry, i) => (
                   <div
                     key={entry._id || i}
@@ -413,14 +445,14 @@ function Dashboard({ dbUser }) {
                       entry.completed ? 'done' : ''
                     }`}
                   >
-                    <span className="db-row-text">
+                    <span className="db-row-text" dir="auto">
                       {entry.type === 'commitment'
                         ? `${entry.task} · ${entry.startHour}:00–${entry.endHour}:00`
-                        : `${entry.task} · ${entry.hours}h`}
+                        : `${entry.task} · ${t('hours', { n: entry.hours })}`}
                     </span>
                     {entry.type !== 'commitment' && (
                       <button className="db-btn db-btn-small" onClick={() => toggleSessionDone(entry)}>
-                        {entry.completed ? 'Undo' : '✓ Done'}
+                        {entry.completed ? t('undo') : t('markDoneBtn')}
                       </button>
                     )}
                   </div>
@@ -428,16 +460,18 @@ function Dashboard({ dbUser }) {
               </div>
 
               <div className="db-panel">
-                <h2 className="db-section-title">Next exam</h2>
-                {!nextExam && <p className="db-empty">No upcoming exams.</p>}
+                <h2 className="db-section-title">{t('nextExam')}</h2>
+                {!nextExam && <p className="db-empty">{t('noUpcomingExams')}</p>}
                 {nextExam && (
                   <>
                     <div className="db-countdown">{daysToExam}</div>
-                    <div className="db-countdown-label">{daysToExam === 1 ? 'day left' : 'days left'}</div>
-                    <div className="db-exam-name">{nextExam.subject}</div>
+                    <div className="db-countdown-label">{daysToExam === 1 ? t('dayLeft') : t('daysLeft')}</div>
+                    <div className="db-exam-name" dir="auto">
+                      {nextExam.subject}
+                    </div>
                     <div className="db-subtle" style={{ margin: 0 }}>
-                      {new Date(nextExam.date).toLocaleDateString('en-GB')} · {nextExam.difficulty} · ~
-                      {nextExam.prepHoursNeeded}h prep
+                      {new Date(nextExam.date).toLocaleDateString(locale)} · {t(nextExam.difficulty)} ·{' '}
+                      {t('prepHours', { n: nextExam.prepHoursNeeded })}
                     </div>
                   </>
                 )}
@@ -450,12 +484,13 @@ function Dashboard({ dbUser }) {
         {tab === 'work' && (
           <div className="db-two-col">
             <div className="db-panel">
-              <h2 className="db-section-title">Tasks</h2>
+              <h2 className="db-section-title">{t('tasks')}</h2>
               <form className="db-form" onSubmit={handleAddTask}>
                 <input
                   className="db-input"
                   type="text"
-                  placeholder="Task title"
+                  dir="auto"
+                  placeholder={t('taskTitle')}
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
@@ -469,25 +504,27 @@ function Dashboard({ dbUser }) {
                     required
                   />
                   <select className="db-select" value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-                    <option>Easy</option>
-                    <option>Medium</option>
-                    <option>Hard</option>
+                    {DIFFICULTIES.map((d) => (
+                      <option key={d} value={d}>
+                        {t(d)}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <input
                   className="db-input"
                   type="number"
                   min="1"
-                  placeholder="Hours (optional — leave empty for AI estimate)"
+                  placeholder={t('hoursOptional')}
                   value={durationHours}
                   onChange={(e) => setDurationHours(e.target.value)}
                 />
                 <button type="submit" className="db-btn db-btn-primary" disabled={taskAdding || scheduleLoading}>
-                  {taskAdding ? (durationHours === '' ? 'Estimating hours…' : 'Adding…') : 'Add task'}
+                  {taskAdding ? (durationHours === '' ? t('estimatingHours') : t('adding')) : t('addTask')}
                 </button>
               </form>
 
-              {tasks.length === 0 && <p className="db-empty">No tasks yet.</p>}
+              {tasks.length === 0 && <p className="db-empty">{t('noTasks')}</p>}
               {tasks.map((task) => (
                 <TaskItem
                   key={task._id}
@@ -501,12 +538,13 @@ function Dashboard({ dbUser }) {
             </div>
 
             <div className="db-panel">
-              <h2 className="db-section-title">Exams</h2>
+              <h2 className="db-section-title">{t('exams')}</h2>
               <form className="db-form" onSubmit={handleAddExam}>
                 <input
                   className="db-input"
                   type="text"
-                  placeholder="Subject"
+                  dir="auto"
+                  placeholder={t('subject')}
                   value={examSubject}
                   onChange={(e) => setExamSubject(e.target.value)}
                   required
@@ -524,17 +562,19 @@ function Dashboard({ dbUser }) {
                     value={examDifficulty}
                     onChange={(e) => setExamDifficulty(e.target.value)}
                   >
-                    <option>Easy</option>
-                    <option>Medium</option>
-                    <option>Hard</option>
+                    {DIFFICULTIES.map((d) => (
+                      <option key={d} value={d}>
+                        {t(d)}
+                      </option>
+                    ))}
                   </select>
                 </div>
                 <button type="submit" className="db-btn db-btn-primary" disabled={scheduleLoading}>
-                  Add exam
+                  {t('addExam')}
                 </button>
               </form>
 
-              {exams.length === 0 && <p className="db-empty">No exams yet.</p>}
+              {exams.length === 0 && <p className="db-empty">{t('noExams')}</p>}
               {exams.map((exam) => (
                 <ExamItem
                   key={exam._id}
@@ -552,38 +592,33 @@ function Dashboard({ dbUser }) {
         {tab === 'schedule' && (
           <div className="db-panel">
             <div className="db-panel-head">
-              <h2 className="db-section-title">Your schedule</h2>
+              <h2 className="db-section-title">{t('yourSchedule')}</h2>
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <div className="db-toggle">
                   <button
                     className={scheduleView === 'week' ? 'active' : ''}
                     onClick={() => setScheduleView('week')}
                   >
-                    Week
+                    {t('week')}
                   </button>
                   <button
                     className={scheduleView === 'list' ? 'active' : ''}
                     onClick={() => setScheduleView('list')}
                   >
-                    List
+                    {t('list')}
                   </button>
                 </div>
                 <button className="db-btn db-btn-primary" onClick={generateSchedule} disabled={scheduleLoading}>
-                  {scheduleLoading ? 'Updating…' : 'Regenerate with AI'}
+                  {scheduleLoading ? t('updating') : t('regenerate')}
                 </button>
               </div>
             </div>
 
             {schedule?.isOverloaded && (
-              <div className="db-error">
-                Overload detected on {schedule.overloadedDays.length} day(s). Consider moving a deadline or
-                freeing up time in Settings.
-              </div>
+              <div className="db-error">{t('overload', { n: schedule.overloadedDays.length })}</div>
             )}
 
-            {!schedule?.entries && (
-              <p className="db-empty">No schedule yet. Add tasks or exams, or click Regenerate with AI.</p>
-            )}
+            {!schedule?.entries && <p className="db-empty">{t('noSchedule')}</p>}
 
             {schedule?.entries &&
               (scheduleView === 'week' ? (
@@ -594,9 +629,13 @@ function Dashboard({ dbUser }) {
           </div>
         )}
 
-        {/* ========== ASSISTANT (stays mounted so the chat isn't lost when switching tabs) ========== */}
+        {/* ========== ASSISTANT + SUMMARIZER (stay mounted so nothing is lost when switching tabs) ========== */}
         <div style={{ display: tab === 'assistant' ? 'block' : 'none' }}>
           <ChatAssistant userId={dbUser._id} />
+        </div>
+
+        <div style={{ display: tab === 'summarize' ? 'block' : 'none' }}>
+          <Summarizer />
         </div>
 
         {/* ========== ANALYTICS ========== */}
@@ -605,12 +644,12 @@ function Dashboard({ dbUser }) {
         {/* ========== SETTINGS ========== */}
         {tab === 'settings' && (
           <div className="db-panel">
-            <h2 className="db-section-title">Weekly routine</h2>
-            <p className="db-subtle">Used to calculate your real free study hours each day.</p>
+            <h2 className="db-section-title">{t('weeklyRoutine')}</h2>
+            <p className="db-subtle">{t('routineHint')}</p>
 
             <div className="db-form-row" style={{ maxWidth: 360, marginBottom: 24 }}>
               <div className="db-field">
-                <label htmlFor="sleep-time">Sleep time (24h)</label>
+                <label htmlFor="sleep-time">{t('sleepTime')}</label>
                 <input
                   id="sleep-time"
                   className="db-input"
@@ -622,7 +661,7 @@ function Dashboard({ dbUser }) {
                 />
               </div>
               <div className="db-field">
-                <label htmlFor="wake-time">Wake time (24h)</label>
+                <label htmlFor="wake-time">{t('wakeTime')}</label>
                 <input
                   id="wake-time"
                   className="db-input"
@@ -636,23 +675,23 @@ function Dashboard({ dbUser }) {
             </div>
 
             <h3 className="db-section-title" style={{ fontSize: 17 }}>
-              Recurring commitments
+              {t('recurring')}
             </h3>
-            {commitments.length === 0 && <p className="db-empty">None added yet.</p>}
+            {commitments.length === 0 && <p className="db-empty">{t('noneYet')}</p>}
             {commitments.map((c, i) => (
               <div key={i} className="db-commitment-row">
-                <span>
-                  <strong>{c.day}</strong> — {c.label} ({c.startHour}:00–{c.endHour}:00)
+                <span dir="auto">
+                  <strong>{dayLabel(c.day)}</strong> — {c.label} ({c.startHour}:00–{c.endHour}:00)
                 </span>
                 <button className="db-btn db-btn-small db-btn-danger" onClick={() => removeCommitment(i)}>
-                  Remove
+                  {t('remove')}
                 </button>
               </div>
             ))}
 
             <div className="db-commitment-add">
               <div className="db-field">
-                <label htmlFor="c-day">Day</label>
+                <label htmlFor="c-day">{t('day')}</label>
                 <select
                   id="c-day"
                   className="db-select"
@@ -660,23 +699,26 @@ function Dashboard({ dbUser }) {
                   onChange={(e) => setNewCommitmentDay(e.target.value)}
                 >
                   {DAYS.map((d) => (
-                    <option key={d}>{d}</option>
+                    <option key={d} value={d}>
+                      {dayLabel(d)}
+                    </option>
                   ))}
                 </select>
               </div>
               <div className="db-field">
-                <label htmlFor="c-label">Label</label>
+                <label htmlFor="c-label">{t('label')}</label>
                 <input
                   id="c-label"
                   className="db-input"
                   type="text"
-                  placeholder="Gym"
+                  dir="auto"
+                  placeholder={t('gymPlaceholder')}
                   value={newCommitmentLabel}
                   onChange={(e) => setNewCommitmentLabel(e.target.value)}
                 />
               </div>
               <div className="db-field">
-                <label htmlFor="c-start">Start</label>
+                <label htmlFor="c-start">{t('start')}</label>
                 <input
                   id="c-start"
                   className="db-input db-input-small"
@@ -688,7 +730,7 @@ function Dashboard({ dbUser }) {
                 />
               </div>
               <div className="db-field">
-                <label htmlFor="c-end">End</label>
+                <label htmlFor="c-end">{t('end')}</label>
                 <input
                   id="c-end"
                   className="db-input db-input-small"
@@ -700,7 +742,7 @@ function Dashboard({ dbUser }) {
                 />
               </div>
               <button className="db-btn" onClick={addCommitment}>
-                Add
+                {t('add')}
               </button>
             </div>
 
@@ -709,12 +751,20 @@ function Dashboard({ dbUser }) {
               onClick={saveSettings}
               style={{ marginTop: 24, width: '100%' }}
             >
-              Save settings
+              {t('saveSettings')}
             </button>
-            {settingsSaved && <p className="db-success">Settings saved.</p>}
+            {settingsSaved && <p className="db-success">{t('settingsSaved')}</p>}
           </div>
         )}
       </main>
+
+      <SupportModal
+        open={supportOpen}
+        onClose={() => setSupportOpen(false)}
+        prefill={supportPrefill}
+        userId={dbUser._id}
+        page={tab}
+      />
     </div>
   );
 }

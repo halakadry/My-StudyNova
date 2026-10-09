@@ -27,6 +27,8 @@ app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/schedule', require('./routes/schedule'));
 app.use('/api/chat', require('./routes/chat'));
+app.use('/api/summarize', require('./routes/summarize'));
+app.use('/api/reports', require('./routes/reports'));
 
 app.get('/', (req, res) => {
   res.send('StudyNova backend is running');
