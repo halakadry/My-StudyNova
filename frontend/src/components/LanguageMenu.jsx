@@ -73,21 +73,23 @@ function LanguageMenu() {
         onClick={() => setOpen(!open)}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-label={t('language')}
+        aria-label={`${t('language')}: ${current.name}`}
+        title={current.name}
       >
-        <span className="db-lang-tag">{current.tag}</span>
-        <span dir="auto">{current.name}</span>
+        <span className="db-lang-tag db-lang-tag-current">{current.tag}</span>
         <Chevron open={open} />
       </button>
 
       {open && (
-        <ul className="db-lang-menu" role="listbox" aria-label={t('language')}>
+        <ul className="db-lang-menu db-lang-menu-compact" role="listbox" aria-label={t('language')}>
           {LANGUAGES.map((l) => (
             <li key={l.code}>
               <button
                 type="button"
                 role="option"
                 aria-selected={l.code === lang}
+                aria-label={l.name}
+                title={l.name}
                 className={`db-lang-option ${l.code === lang ? 'active' : ''}`}
                 onClick={() => {
                   setLanguage(l.code);
@@ -95,9 +97,6 @@ function LanguageMenu() {
                 }}
               >
                 <span className="db-lang-tag">{l.tag}</span>
-                <span className="db-lang-name" dir="auto">
-                  {l.name}
-                </span>
                 {l.code === lang && <Check />}
               </button>
             </li>

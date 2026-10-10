@@ -21,11 +21,13 @@ Return ONLY a JSON object, with no extra text, in exactly this format:
   "title": "short title of the material",
   "summary": "a clear summary in 1-3 short paragraphs, paragraphs separated by \\n\\n",
   "keyPoints": ["5 to 10 key points, each one short sentence"],
-  "questions": [{"question": "practice question", "answer": "short correct answer"}]
+  "questions": [{"question": "practice question", "answer": "short correct answer"}],
+  "studyHours": 4
 }
 
 Rules:
 - Exactly 5 practice questions that test understanding, not only memorization.
+- "studyHours": a whole number from 2 to 12 — how many hours a typical student needs to study this material well enough for an exam (longer or harder material = more hours).
 - Use only information from the material. Do not invent facts.
 - Plain text only. No markdown symbols like ** or #.`;
 }
@@ -55,6 +57,7 @@ async function fileToParts(file) {
 
 // Makes sure the result always has the expected shape
 function normalize(data) {
+  const hours = Math.round(Number(data.studyHours));
   return {
     title: String(data.title || 'Summary'),
     summary: String(data.summary || ''),
@@ -64,6 +67,7 @@ function normalize(data) {
           .filter((q) => q && q.question)
           .map((q) => ({ question: String(q.question), answer: String(q.answer || '') }))
       : [],
+    studyHours: hours >= 2 && hours <= 12 ? hours : 4,
   };
 }
 

@@ -1029,3 +1029,45 @@ body:has(.db-page) {
     display: none;
   }
 }
+/* Compact language menu: codes only */
+.db-lang-menu-compact {
+  min-width: 110px;
+}
+
+.db-lang-menu-compact .db-lang-option {
+  justify-content: space-between;
+}
+
+.db-lang-menu-compact .db-lang-tag {
+  font-size: 14px;
+  color: var(--db-ink);
+}
+
+.db-lang-menu-compact .db-lang-option.active .db-lang-tag {
+  color: var(--db-olive-dark);
+}
+
+.db-lang-tag-current {
+  font-size: 14px;
+  color: var(--db-ink);
+}
+/* ---------- Summary → study plan ---------- */
+
+.db-plan-box {
+  margin-top: 28px;
+  padding: 20px;
+  border: 1px dashed var(--db-olive);
+  border-radius: 12px;
+  background: var(--db-sage);
+}
+
+.db-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.db-toggle button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

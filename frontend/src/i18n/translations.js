@@ -520,5 +520,61 @@ Object.assign(translations.ar, {
   pdfHint: 'في نافذة الطباعة اختر "حفظ كملف PDF" كطابعة.',
   errExport: 'تعذّر إنشاء الملف. حاول مرة أخرى.',
 });
+// Summary → study plan
+Object.assign(translations.en, {
+  addToPlan: 'Add to my study plan',
+  addToPlanHint: 'Turn this lecture into study time in your schedule.',
+  toExam: 'Add to an exam',
+  toTask: 'Create a study task',
+  chooseExam: 'Exam',
+  studyHoursLabel: 'Study hours',
+  suggestedHours: 'AI suggests {n}h for this material',
+  addToExamBtn: 'Add to exam',
+  createTaskBtn: 'Create task',
+  reviewPrefix: 'Review:',
+  taskName: 'Task name',
+  deadlineLabel: 'Deadline',
+  difficultyLabel: 'Difficulty',
+  planAdded: 'Added! Your schedule is being updated.',
+  errPlan: 'Could not add to your plan. Please try again.',
+  noExamsForPlan: 'No upcoming exams yet. Create a study task instead.',
+});
 
+Object.assign(translations.he, {
+  addToPlan: 'הוספה לתוכנית הלימודים',
+  addToPlanHint: 'הפכו את ההרצאה הזו לזמן לימוד בלוח הזמנים שלכם.',
+  toExam: 'הוספה למבחן',
+  toTask: 'יצירת משימת לימוד',
+  chooseExam: 'מבחן',
+  studyHoursLabel: 'שעות לימוד',
+  suggestedHours: 'ה־AI מציע {n} ש׳ לחומר הזה',
+  addToExamBtn: 'הוספה למבחן',
+  createTaskBtn: 'יצירת משימה',
+  reviewPrefix: 'חזרה:',
+  taskName: 'שם המשימה',
+  deadlineLabel: 'תאריך יעד',
+  difficultyLabel: 'רמת קושי',
+  planAdded: 'נוסף! לוח הזמנים מתעדכן.',
+  errPlan: 'לא ניתן להוסיף לתוכנית. נסו שוב.',
+  noExamsForPlan: 'אין עדיין מבחנים קרובים. צרו משימת לימוד במקום.',
+});
+
+Object.assign(translations.ar, {
+  addToPlan: 'أضف إلى خطة الدراسة',
+  addToPlanHint: 'حوّل هذه المحاضرة إلى وقت دراسة في جدولك.',
+  toExam: 'أضف إلى امتحان',
+  toTask: 'أنشئ مهمة دراسة',
+  chooseExam: 'الامتحان',
+  studyHoursLabel: 'ساعات الدراسة',
+  suggestedHours: 'يقترح الذكاء الاصطناعي {n} س لهذه المادة',
+  addToExamBtn: 'أضف إلى الامتحان',
+  createTaskBtn: 'أنشئ المهمة',
+  reviewPrefix: 'مراجعة:',
+  taskName: 'اسم المهمة',
+  deadlineLabel: 'الموعد النهائي',
+  difficultyLabel: 'الصعوبة',
+  planAdded: 'تمت الإضافة! يتم تحديث جدولك.',
+  errPlan: 'تعذّرت الإضافة إلى خطتك. حاول مرة أخرى.',
+  noExamsForPlan: 'لا توجد امتحانات قادمة بعد. أنشئ مهمة دراسة بدلًا من ذلك.',
+});
 export default translations;

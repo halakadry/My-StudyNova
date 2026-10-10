@@ -237,7 +237,29 @@ function Dashboard({ dbUser }) {
       console.error(err);
     }
   };
+  /* ---------- Summary → study plan ---------- */
 
+  // Adds a summarized lecture's study hours to an exam's prep
+  const addLectureToExam = async (examId, hours) => {
+    const exam = exams.find((e) => e._id === examId);
+    if (!exam) throw new Error('Exam not found');
+    await api.put(`/exams/${examId}`, { prepHoursNeeded: (exam.prepHoursNeeded || 0) + hours });
+    fetchExams();
+    refreshSchedule();
+  };
+
+  // Creates a study task from a summarized lecture
+  const createTaskFromSummary = async ({ title: taskTitle, deadline: taskDeadline, difficulty: taskDifficulty, hours }) => {
+    await api.post('/tasks', {
+      userId: dbUser._id,
+      title: taskTitle,
+      deadline: taskDeadline,
+      difficulty: taskDifficulty,
+      durationHours: hours,
+    });
+    fetchTasks();
+    refreshSchedule();
+  };
   /* ---------- Schedule ---------- */
 
   const generateSchedule = async () => {
@@ -635,8 +657,7 @@ function Dashboard({ dbUser }) {
         </div>
 
         <div style={{ display: tab === 'summarize' ? 'block' : 'none' }}>
-          <Summarizer />
-        </div>
+          <Summarizer exams={exams} onAddToExam={addLectureToExam} onCreateTask={createTaskFromSummary} />        </div>
 
         {/* ========== ANALYTICS ========== */}
         {tab === 'analytics' && <Analytics tasks={tasks} schedule={schedule} />}
