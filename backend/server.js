@@ -17,9 +17,12 @@ initializeApp({
 const app = express();
 
 // Online: only the Vercel site may call the backend. Locally: anything is allowed.
-app.use(cors({
-  origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : '*'
-}));
+// Online: only the listed sites may call the backend (spaces and trailing "/" are ignored).
+// Locally (no CLIENT_URL): anything is allowed.
+const allowedOrigins = process.env.CLIENT_URL
+  ? process.env.CLIENT_URL.split(',').map((url) => url.trim().replace(/\/+$/, ''))
+  : '*';
+app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.use('/api/users', require('./routes/users'));
