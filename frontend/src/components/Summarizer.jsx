@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useLanguage } from '../i18n/useLanguage';
 import { downloadSummaryWord, printSummaryPdf } from '../utils/exportSummary';
+import Flashcards from './Flashcards';
 
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
 
@@ -16,13 +17,16 @@ function inDays(n) {
   const d = new Date();
   d.setDate(d.getDate() + n);
   return toDateString(d);
-}// "Review:" in the same language as the lecture title
+}
+
+// "Review:" in the same language as the lecture title
 function reviewPrefixFor(title, fallback) {
   if (/[\u0590-\u05FF]/.test(title || '')) return 'חזרה:';
   if (/[\u0600-\u06FF]/.test(title || '')) return 'مراجعة:';
   return fallback;
 }
-function Summarizer({ exams = [], onAddToExam, onCreateTask }) {
+
+function Summarizer({ exams = [], onAddToExam, onCreateTask, onQuizFinished }) {
   const { t, locale } = useLanguage();
   const [file, setFile] = useState(null);
   const [language, setLanguage] = useState('auto');
@@ -32,6 +36,7 @@ function Summarizer({ exams = [], onAddToExam, onCreateTask }) {
   const [copied, setCopied] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [showPdfHint, setShowPdfHint] = useState(false);
+  const [practicing, setPracticing] = useState(false);
 
   // "Add to my study plan" form
   const today = toDateString(new Date());
@@ -49,13 +54,15 @@ function Summarizer({ exams = [], onAddToExam, onCreateTask }) {
   const [planDone, setPlanDone] = useState(false);
   const [planError, setPlanError] = useState('');
 
-  // Reset the plan form every time a new summary arrives
+  // Reset the plan form + flashcards every time a new summary arrives
   useEffect(() => {
     if (!result) return;
+    setPracticing(false);
     setPlanMode(upcomingExams.length ? 'exam' : 'task');
     setPlanExamId(upcomingExams[0]?._id || '');
     setPlanHours(result.studyHours || 4);
-    setPlanTitle(`${reviewPrefixFor(result.title, t('reviewPrefix'))} ${result.title}`);    setPlanDeadline(inDays(7));
+    setPlanTitle(`${reviewPrefixFor(result.title, t('reviewPrefix'))} ${result.title}`);
+    setPlanDeadline(inDays(7));
     setPlanDifficulty('Medium');
     setPlanDone(false);
     setPlanError('');
@@ -142,7 +149,7 @@ function Summarizer({ exams = [], onAddToExam, onCreateTask }) {
         await onAddToExam(planExamId, hours);
       } else {
         await onCreateTask({
-          title: planTitle.trim() || `${t('reviewPrefix')} ${result.title}`,
+          title: planTitle.trim() || `${reviewPrefixFor(result.title, t('reviewPrefix'))} ${result.title}`,
           deadline: planDeadline,
           difficulty: planDifficulty,
           hours,
@@ -229,185 +236,202 @@ function Summarizer({ exams = [], onAddToExam, onCreateTask }) {
             </p>
           )}
 
-          <div className="db-summary-text" dir="auto">
-            {result.summary
-              .split(/\n\s*\n/)
-              .filter((p) => p.trim())
-              .map((p, i) => (
-                <p key={i}>{p.trim()}</p>
-              ))}
-          </div>
-
-          {result.keyPoints.length > 0 && (
+          {practicing ? (
+            <Flashcards
+              questions={result.questions}
+              onFinish={(known, total) => onQuizFinished?.({ title: result.title, total, known })}
+              onClose={() => setPracticing(false)}
+            />
+          ) : (
             <>
-              <h3 className="db-subheading">{t('keyPoints')}</h3>
-              <ul className="db-keypoints" dir="auto">
-                {result.keyPoints.map((point, i) => (
-                  <li key={i}>{point}</li>
-                ))}
-              </ul>
-            </>
-          )}
+              <div className="db-summary-text" dir="auto">
+                {result.summary
+                  .split(/\n\s*\n/)
+                  .filter((p) => p.trim())
+                  .map((p, i) => (
+                    <p key={i}>{p.trim()}</p>
+                  ))}
+              </div>
 
-          {result.questions.length > 0 && (
-            <>
-              <h3 className="db-subheading">{t('practiceQuestions')}</h3>
-              {result.questions.map((q, i) => (
-                <details key={i} className="db-question" dir="auto">
-                  <summary>
-                    {i + 1}. {q.question}
-                  </summary>
-                  <p>{q.answer}</p>
-                </details>
-              ))}
-            </>
-          )}
+              {result.keyPoints.length > 0 && (
+                <>
+                  <h3 className="db-subheading">{t('keyPoints')}</h3>
+                  <ul className="db-keypoints" dir="auto">
+                    {result.keyPoints.map((point, i) => (
+                      <li key={i}>{point}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
 
-          {/* ---------- Summary → study plan ---------- */}
-          <div className="db-plan-box">
-            <h3 className="db-subheading" style={{ marginTop: 0 }}>
-              {t('addToPlan')}
-            </h3>
-            <p className="db-subtle" style={{ margin: '0 0 12px' }}>
-              {t('addToPlanHint')} {t('suggestedHours', { n: result.studyHours || 4 })}
-            </p>
+              {result.questions.length > 0 && (
+                <>
+                  <div className="db-panel-head" style={{ marginBottom: 10, marginTop: 22 }}>
+                    <h3 className="db-subheading" style={{ margin: 0 }}>
+                      {t('practiceQuestions')}
+                    </h3>
+                    <button className="db-btn db-btn-small db-btn-primary" onClick={() => setPracticing(true)}>
+                      {t('practiceFlashcards')}
+                    </button>
+                  </div>
+                  {result.questions.map((q, i) => (
+                    <details key={i} className="db-question" dir="auto">
+                      <summary>
+                        {i + 1}. {q.question}
+                      </summary>
+                      <p>{q.answer}</p>
+                    </details>
+                  ))}
+                </>
+              )}
 
-            {planDone ? (
-              <p className="db-success" style={{ margin: 0 }}>
-                {t('planAdded')}
-              </p>
-            ) : (
-              <form onSubmit={handleAddToPlan}>
-                <div className="db-toggle" style={{ marginBottom: 14 }}>
-                  <button
-                    type="button"
-                    className={planMode === 'exam' ? 'active' : ''}
-                    onClick={() => setPlanMode('exam')}
-                    disabled={!upcomingExams.length}
-                  >
-                    {t('toExam')}
-                  </button>
-                  <button
-                    type="button"
-                    className={planMode === 'task' ? 'active' : ''}
-                    onClick={() => setPlanMode('task')}
-                  >
-                    {t('toTask')}
-                  </button>
-                </div>
+              {/* ---------- Summary → study plan ---------- */}
+              <div className="db-plan-box">
+                <h3 className="db-subheading" style={{ marginTop: 0 }}>
+                  {t('addToPlan')}
+                </h3>
+                <p className="db-subtle" style={{ margin: '0 0 12px' }}>
+                  {t('addToPlanHint')} {t('suggestedHours', { n: result.studyHours || 4 })}
+                </p>
 
-                {!upcomingExams.length && (
-                  <p className="db-item-meta" style={{ margin: '0 0 12px' }}>
-                    {t('noExamsForPlan')}
+                {planDone ? (
+                  <p className="db-success" style={{ margin: 0 }}>
+                    {t('planAdded')}
                   </p>
-                )}
-
-                {planMode === 'exam' ? (
-                  <div className="db-plan-grid">
-                    <div className="db-field">
-                      <label htmlFor="plan-exam">{t('chooseExam')}</label>
-                      <select
-                        id="plan-exam"
-                        className="db-select"
-                        value={planExamId}
-                        onChange={(e) => setPlanExamId(e.target.value)}
-                        required
-                      >
-                        {upcomingExams.map((exam) => (
-                          <option key={exam._id} value={exam._id}>
-                            {exam.subject} · {new Date(exam.date).toLocaleDateString(locale)}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="db-field">
-                      <label htmlFor="plan-hours-exam">{t('studyHoursLabel')}</label>
-                      <input
-                        id="plan-hours-exam"
-                        className="db-input"
-                        type="number"
-                        min="1"
-                        max="40"
-                        value={planHours}
-                        onChange={(e) => setPlanHours(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
                 ) : (
-                  <div className="db-plan-grid">
-                    <div className="db-field" style={{ gridColumn: '1 / -1' }}>
-                      <label htmlFor="plan-title">{t('taskName')}</label>
-                      <input
-                        id="plan-title"
-                        className="db-input"
-                        type="text"
-                        dir="auto"
-                        value={planTitle}
-                        onChange={(e) => setPlanTitle(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="db-field">
-                      <label htmlFor="plan-deadline">{t('deadlineLabel')}</label>
-                      <input
-                        id="plan-deadline"
-                        className="db-input"
-                        type="date"
-                        min={today}
-                        value={planDeadline}
-                        onChange={(e) => setPlanDeadline(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <div className="db-field">
-                      <label htmlFor="plan-difficulty">{t('difficultyLabel')}</label>
-                      <select
-                        id="plan-difficulty"
-                        className="db-select"
-                        value={planDifficulty}
-                        onChange={(e) => setPlanDifficulty(e.target.value)}
+                  <form onSubmit={handleAddToPlan}>
+                    <div className="db-toggle" style={{ marginBottom: 14 }}>
+                      <button
+                        type="button"
+                        className={planMode === 'exam' ? 'active' : ''}
+                        onClick={() => setPlanMode('exam')}
+                        disabled={!upcomingExams.length}
                       >
-                        {DIFFICULTIES.map((d) => (
-                          <option key={d} value={d}>
-                            {t(d)}
-                          </option>
-                        ))}
-                      </select>
+                        {t('toExam')}
+                      </button>
+                      <button
+                        type="button"
+                        className={planMode === 'task' ? 'active' : ''}
+                        onClick={() => setPlanMode('task')}
+                      >
+                        {t('toTask')}
+                      </button>
                     </div>
-                    <div className="db-field">
-                      <label htmlFor="plan-hours-task">{t('studyHoursLabel')}</label>
-                      <input
-                        id="plan-hours-task"
-                        className="db-input"
-                        type="number"
-                        min="1"
-                        max="40"
-                        value={planHours}
-                        onChange={(e) => setPlanHours(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                )}
 
-                {planError && (
-                  <div className="db-error" style={{ margin: '12px 0 0' }}>
-                    {planError}
-                  </div>
-                )}
+                    {!upcomingExams.length && (
+                      <p className="db-item-meta" style={{ margin: '0 0 12px' }}>
+                        {t('noExamsForPlan')}
+                      </p>
+                    )}
 
-                <button
-                  type="submit"
-                  className="db-btn db-btn-primary"
-                  style={{ marginTop: 14 }}
-                  disabled={planSaving || (planMode === 'exam' && !planExamId)}
-                >
-                  {planSaving ? t('saving') : planMode === 'exam' ? t('addToExamBtn') : t('createTaskBtn')}
-                </button>
-              </form>
-            )}
-          </div>
+                    {planMode === 'exam' ? (
+                      <div className="db-plan-grid">
+                        <div className="db-field">
+                          <label htmlFor="plan-exam">{t('chooseExam')}</label>
+                          <select
+                            id="plan-exam"
+                            className="db-select"
+                            value={planExamId}
+                            onChange={(e) => setPlanExamId(e.target.value)}
+                            required
+                          >
+                            {upcomingExams.map((exam) => (
+                              <option key={exam._id} value={exam._id}>
+                                {exam.subject} · {new Date(exam.date).toLocaleDateString(locale)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="db-field">
+                          <label htmlFor="plan-hours-exam">{t('studyHoursLabel')}</label>
+                          <input
+                            id="plan-hours-exam"
+                            className="db-input"
+                            type="number"
+                            min="1"
+                            max="40"
+                            value={planHours}
+                            onChange={(e) => setPlanHours(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="db-plan-grid">
+                        <div className="db-field" style={{ gridColumn: '1 / -1' }}>
+                          <label htmlFor="plan-title">{t('taskName')}</label>
+                          <input
+                            id="plan-title"
+                            className="db-input"
+                            type="text"
+                            dir="auto"
+                            value={planTitle}
+                            onChange={(e) => setPlanTitle(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="db-field">
+                          <label htmlFor="plan-deadline">{t('deadlineLabel')}</label>
+                          <input
+                            id="plan-deadline"
+                            className="db-input"
+                            type="date"
+                            min={today}
+                            value={planDeadline}
+                            onChange={(e) => setPlanDeadline(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div className="db-field">
+                          <label htmlFor="plan-difficulty">{t('difficultyLabel')}</label>
+                          <select
+                            id="plan-difficulty"
+                            className="db-select"
+                            value={planDifficulty}
+                            onChange={(e) => setPlanDifficulty(e.target.value)}
+                          >
+                            {DIFFICULTIES.map((d) => (
+                              <option key={d} value={d}>
+                                {t(d)}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="db-field">
+                          <label htmlFor="plan-hours-task">{t('studyHoursLabel')}</label>
+                          <input
+                            id="plan-hours-task"
+                            className="db-input"
+                            type="number"
+                            min="1"
+                            max="40"
+                            value={planHours}
+                            onChange={(e) => setPlanHours(e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {planError && (
+                      <div className="db-error" style={{ margin: '12px 0 0' }}>
+                        {planError}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      className="db-btn db-btn-primary"
+                      style={{ marginTop: 14 }}
+                      disabled={planSaving || (planMode === 'exam' && !planExamId)}
+                    >
+                      {planSaving ? t('saving') : planMode === 'exam' ? t('addToExamBtn') : t('createTaskBtn')}
+                    </button>
+                  </form>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
     </>

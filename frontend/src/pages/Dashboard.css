@@ -1071,3 +1071,123 @@ body:has(.db-page) {
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* ---------- Flashcards ---------- */
+
+.db-flashcard-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--db-muted);
+}
+
+.db-flashcard {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  perspective: 1200px;
+}
+
+.db-flashcard:focus-visible {
+  outline: 2px solid var(--db-olive);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+.db-flashcard-inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-height: 240px;
+  transition: transform 0.45s ease;
+  transform-style: preserve-3d;
+}
+
+.db-flashcard.flipped .db-flashcard-inner {
+  transform: rotateY(180deg);
+}
+
+.db-flashcard-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 28px;
+  overflow-y: auto;
+  border: 1px solid var(--db-line);
+  border-radius: 14px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.db-flashcard-face.front {
+  background: white;
+}
+
+.db-flashcard-face.back {
+  background: var(--db-sage);
+  transform: rotateY(180deg);
+}
+
+.db-flashcard-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--db-olive);
+}
+
+.db-flashcard-text {
+  font-family: var(--db-serif);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.db-flashcard-hint {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--db-muted);
+}
+
+.db-flashcard-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.db-quiz-score {
+  font-family: var(--db-serif);
+  font-size: 52px;
+  line-height: 1;
+  color: var(--db-olive);
+  text-align: center;
+  margin: 8px 0 14px;
+}
+
+.db-quiz-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--db-line);
+  font-size: 14px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .db-flashcard-inner {
+    transition: none;
+  }
+}

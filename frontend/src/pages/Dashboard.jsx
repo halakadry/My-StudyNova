@@ -67,6 +67,8 @@ function Dashboard({ dbUser }) {
   const [scheduleLoading, setScheduleLoading] = useState(false);
   const [scheduleView, setScheduleView] = useState('week');
 
+  const [quizResults, setQuizResults] = useState([]);
+
   const [sleepTime, setSleepTime] = useState(23);
   const [wakeTime, setWakeTime] = useState(8);
   const [commitments, setCommitments] = useState([]);
@@ -105,6 +107,15 @@ function Dashboard({ dbUser }) {
     }
   };
 
+  const fetchQuizResults = async () => {
+    try {
+      const res = await api.get(`/quiz-results/user/${dbUser._id}`);
+      setQuizResults(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Load the saved schedule. If it was last built before today, rebuild it so missed work moves forward.
   const fetchSchedule = async (allowAutoRefresh = true) => {
     try {
@@ -137,6 +148,7 @@ function Dashboard({ dbUser }) {
       fetchTasks();
       fetchExams();
       fetchSchedule();
+      fetchQuizResults();
       setSleepTime(dbUser.sleepTime ?? 23);
       setWakeTime(dbUser.wakeTime ?? 8);
       setCommitments(dbUser.recurringCommitments ?? []);
@@ -237,7 +249,8 @@ function Dashboard({ dbUser }) {
       console.error(err);
     }
   };
-  /* ---------- Summary → study plan ---------- */
+
+  /* ---------- Summary → study plan + flashcards ---------- */
 
   // Adds a summarized lecture's study hours to an exam's prep
   const addLectureToExam = async (examId, hours) => {
@@ -260,6 +273,13 @@ function Dashboard({ dbUser }) {
     fetchTasks();
     refreshSchedule();
   };
+
+  // Saves a finished flashcard session (shown in Analytics)
+  const saveQuizResult = async ({ title: quizTitle, total, known }) => {
+    await api.post('/quiz-results', { userId: dbUser._id, title: quizTitle, total, known });
+    fetchQuizResults();
+  };
+
   /* ---------- Schedule ---------- */
 
   const generateSchedule = async () => {
@@ -657,10 +677,16 @@ function Dashboard({ dbUser }) {
         </div>
 
         <div style={{ display: tab === 'summarize' ? 'block' : 'none' }}>
-          <Summarizer exams={exams} onAddToExam={addLectureToExam} onCreateTask={createTaskFromSummary} />        </div>
+          <Summarizer
+            exams={exams}
+            onAddToExam={addLectureToExam}
+            onCreateTask={createTaskFromSummary}
+            onQuizFinished={saveQuizResult}
+          />
+        </div>
 
         {/* ========== ANALYTICS ========== */}
-        {tab === 'analytics' && <Analytics tasks={tasks} schedule={schedule} />}
+        {tab === 'analytics' && <Analytics tasks={tasks} schedule={schedule} quizResults={quizResults} />}
 
         {/* ========== SETTINGS ========== */}
         {tab === 'settings' && (
