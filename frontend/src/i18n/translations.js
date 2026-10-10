@@ -640,4 +640,61 @@ Object.assign(translations.ar, {
   noQuizzes: 'لا توجد تدريبات بعد. لخّص محاضرة وتدرّب بالبطاقات.',
   recentQuizzes: 'آخر التدريبات',
 });
+// Calendar export
+Object.assign(translations.en, {
+  addToCalendar: 'Add to calendar',
+  calendarTitle: 'Export to your calendar',
+  calendarHint: 'Download your study plan as a calendar file (.ics) for Google Calendar, Apple Calendar or Outlook.',
+  studyStartLabel: 'Start study sessions at',
+  includeExams: 'Include exams (all-day)',
+  includeCommitments: 'Include commitments (gym, classes…)',
+  downloadIcs: 'Download calendar file',
+  nothingToExport: 'Nothing to export yet. Generate a schedule first.',
+  icsDownloaded: 'Downloaded {n} events.',
+  howToImport: 'How to import',
+  importGoogle: 'Google Calendar (computer): Settings ⚙ → Import & export → Import → choose the file.',
+  importApple: 'iPhone / Mac: open the file and tap "Add All".',
+  importOutlook: 'Outlook: double-click the file, or File → Open & Export → Import.',
+  importTip: 'Tip: import into a separate calendar called "StudyNova", so you can remove old sessions easily when your plan changes.',
+  studyEvent: 'Study: {s}',
+  examEvent: 'Exam: {s}',
+});
+
+Object.assign(translations.he, {
+  addToCalendar: 'הוספה ליומן',
+  calendarTitle: 'ייצוא ליומן שלך',
+  calendarHint: 'הורידו את תוכנית הלימודים כקובץ יומן (.ics) ל־Google Calendar, ליומן של Apple או ל־Outlook.',
+  studyStartLabel: 'שעת התחלת הלימוד',
+  includeExams: 'לכלול מבחנים (יום שלם)',
+  includeCommitments: 'לכלול התחייבויות (חדר כושר, שיעורים…)',
+  downloadIcs: 'הורדת קובץ יומן',
+  nothingToExport: 'אין עדיין מה לייצא. צרו קודם לוח זמנים.',
+  icsDownloaded: 'הורדו {n} אירועים.',
+  howToImport: 'איך לייבא',
+  importGoogle: 'Google Calendar (במחשב): הגדרות ⚙ ← ייבוא וייצוא ← ייבוא ← בחרו את הקובץ.',
+  importApple: 'iPhone / Mac: פתחו את הקובץ והקישו "הוסף הכל".',
+  importOutlook: 'Outlook: לחיצה כפולה על הקובץ, או קובץ ← פתיחה וייצוא ← ייבוא.',
+  importTip: 'טיפ: ייבאו ליומן נפרד בשם "StudyNova", כך שקל למחוק מפגשים ישנים כשהתוכנית משתנה.',
+  studyEvent: 'לימוד: {s}',
+  examEvent: 'מבחן: {s}',
+});
+
+Object.assign(translations.ar, {
+  addToCalendar: 'أضف إلى التقويم',
+  calendarTitle: 'التصدير إلى تقويمك',
+  calendarHint: 'نزّل خطة دراستك كملف تقويم (.ics) لتقويم Google أو تقويم Apple أو Outlook.',
+  studyStartLabel: 'بدء جلسات الدراسة في',
+  includeExams: 'تضمين الامتحانات (يوم كامل)',
+  includeCommitments: 'تضمين الالتزامات (النادي، المحاضرات…)',
+  downloadIcs: 'تنزيل ملف التقويم',
+  nothingToExport: 'لا يوجد ما يُصدَّر بعد. أنشئ جدولًا أولًا.',
+  icsDownloaded: 'تم تنزيل {n} حدثًا.',
+  howToImport: 'طريقة الاستيراد',
+  importGoogle: 'تقويم Google (على الحاسوب): الإعدادات ⚙ ← الاستيراد والتصدير ← استيراد ← اختر الملف.',
+  importApple: 'iPhone / Mac: افتح الملف واضغط "إضافة الكل".',
+  importOutlook: 'Outlook: انقر نقرًا مزدوجًا على الملف، أو ملف ← فتح وتصدير ← استيراد.',
+  importTip: 'نصيحة: استورد إلى تقويم منفصل باسم "StudyNova" لتتمكن من حذف الجلسات القديمة بسهولة عند تغيّر خطتك.',
+  studyEvent: 'دراسة: {s}',
+  examEvent: 'امتحان: {s}',
+});
 export default translations;

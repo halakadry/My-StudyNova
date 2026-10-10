@@ -1191,3 +1191,31 @@ body:has(.db-page) {
     transition: none;
   }
 }
+/* ---------- Calendar export ---------- */
+
+.db-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.db-check input {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--db-olive);
+}
+
+.db-import-help {
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--db-sage);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.db-import-help ul {
+  margin: 6px 0 8px;
+  padding-inline-start: 18px;
+}

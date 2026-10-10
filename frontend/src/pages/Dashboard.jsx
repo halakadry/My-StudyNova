@@ -11,6 +11,7 @@ import ChatAssistant from '../components/ChatAssistant';
 import Summarizer from '../components/Summarizer';
 import LanguageMenu from '../components/LanguageMenu';
 import SupportModal from '../components/SupportModal';
+import CalendarExport from '../components/CalendarExport';
 import { useLanguage } from '../i18n/useLanguage';
 import './Dashboard.css';
 
@@ -650,6 +651,7 @@ function Dashboard({ dbUser }) {
                     {t('list')}
                   </button>
                 </div>
+                                <CalendarExport entries={schedule?.entries || []} exams={exams} />
                 <button className="db-btn db-btn-primary" onClick={generateSchedule} disabled={scheduleLoading}>
                   {scheduleLoading ? t('updating') : t('regenerate')}
                 </button>
