@@ -321,9 +321,11 @@ function buildOnce(userId) {
   return promise;
 }
 
+// req.user = the logged-in user (set in server.js). The userId sent by the browser is ignored.
+
 router.post('/generate', async (req, res) => {
   try {
-    const { savedSchedule, regenerationAttempts } = await buildOnce(req.body.userId);
+    const { savedSchedule, regenerationAttempts } = await buildOnce(req.user._id);
     res.status(200).json({ ...savedSchedule.toObject(), regenerationAttempts });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -332,17 +334,17 @@ router.post('/generate', async (req, res) => {
 
 router.post('/reschedule', async (req, res) => {
   try {
-    const { savedSchedule, regenerationAttempts } = await buildOnce(req.body.userId);
+    const { savedSchedule, regenerationAttempts } = await buildOnce(req.user._id);
     res.status(200).json({ ...savedSchedule.toObject(), regenerationAttempts, rescheduled: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Mark a single study session as done / not done
+// Mark one of your own study sessions as done / not done
 router.patch('/entry/:entryId/toggle', async (req, res) => {
   try {
-    const schedule = await Schedule.findOne({ 'entries._id': req.params.entryId });
+    const schedule = await Schedule.findOne({ userId: req.user._id, 'entries._id': req.params.entryId });
     if (!schedule) return res.status(404).json({ error: 'Session not found' });
 
     const entry = schedule.entries.id(req.params.entryId);
@@ -358,9 +360,10 @@ router.patch('/entry/:entryId/toggle', async (req, res) => {
   }
 });
 
+// Your own schedule
 router.get('/:userId', async (req, res) => {
   try {
-    const schedule = await Schedule.findOne({ userId: req.params.userId }).sort({ updatedAt: -1 });
+    const schedule = await Schedule.findOne({ userId: req.user._id }).sort({ updatedAt: -1 });
     if (!schedule) return res.status(404).json({ error: 'No schedule found' });
     res.json(schedule);
   } catch (err) {

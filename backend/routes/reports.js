@@ -3,17 +3,20 @@ const router = express.Router();
 const Report = require('../models/Report');
 const { sendSupportEmail } = require('../services/emailService');
 
-// Save a support message from the website, then email it to the StudyNova inbox
+// Save a support message from the logged-in user, then email it to the StudyNova inbox
 router.post('/', async (req, res) => {
   try {
-    const { userId, email, category, message, page, language, userAgent } = req.body;
+    const { category, message, page, language, userAgent } = req.body;
 
     if (!message || !String(message).trim()) {
       return res.status(400).json({ error: 'Message is required' });
     }
 
+    // The sender's identity comes from the verified login, not from the browser
+    const email = req.firebaseUser.email || req.user.email;
+
     const report = await Report.create({
-      userId: userId || undefined,
+      userId: req.user._id,
       email: email ? String(email).slice(0, 200) : undefined,
       category: ['bug', 'question', 'idea'].includes(category) ? category : 'bug',
       message: String(message).trim().slice(0, 5000),

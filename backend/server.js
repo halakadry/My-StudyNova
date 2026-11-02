@@ -14,9 +14,11 @@ initializeApp({
   credential: cert(serviceAccount)
 });
 
+// Loaded after initializeApp, because it uses Firebase
+const { requireAuth, requireUser } = require('./middleware/auth');
+
 const app = express();
 
-// Online: only the Vercel site may call the backend. Locally: anything is allowed.
 // Online: only the listed sites may call the backend (spaces and trailing "/" are ignored).
 // Locally (no CLIENT_URL): anything is allowed.
 const allowedOrigins = process.env.CLIENT_URL
@@ -25,14 +27,17 @@ const allowedOrigins = process.env.CLIENT_URL
 app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
-app.use('/api/users', require('./routes/users'));
-app.use('/api/tasks', require('./routes/tasks'));
-app.use('/api/exams', require('./routes/exams'));
-app.use('/api/schedule', require('./routes/schedule'));
-app.use('/api/chat', require('./routes/chat'));
-app.use('/api/summarize', require('./routes/summarize'));
-app.use('/api/reports', require('./routes/reports'));
-app.use('/api/quiz-results', require('./routes/quizResults'));
+// Every API route needs a valid login. Only /users works before the profile exists (sign-up).
+const loggedIn = [requireAuth, requireUser];
+
+app.use('/api/users', requireAuth, require('./routes/users'));
+app.use('/api/tasks', loggedIn, require('./routes/tasks'));
+app.use('/api/exams', loggedIn, require('./routes/exams'));
+app.use('/api/schedule', loggedIn, require('./routes/schedule'));
+app.use('/api/chat', loggedIn, require('./routes/chat'));
+app.use('/api/summarize', loggedIn, require('./routes/summarize'));
+app.use('/api/reports', loggedIn, require('./routes/reports'));
+app.use('/api/quiz-results', loggedIn, require('./routes/quizResults'));
 
 app.get('/', (req, res) => {
   res.send('StudyNova backend is running');

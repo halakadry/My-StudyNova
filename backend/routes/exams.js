@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Exam = require('../models/Exam');
 
+// req.user = the logged-in user (set in server.js). Every query is limited to their own exams.
+
 function estimatePrepHours(difficulty, daysUntilExam) {
   const baseHoursByDifficulty = { Easy: 5, Medium: 10, Hard: 18 };
   const base = baseHoursByDifficulty[difficulty] || 10;
@@ -12,7 +14,7 @@ function estimatePrepHours(difficulty, daysUntilExam) {
 // Create an exam
 router.post('/', async (req, res) => {
   try {
-    const { userId, subject, date, difficulty, prepHoursNeeded } = req.body;
+    const { subject, date, difficulty, prepHoursNeeded } = req.body;
 
     let finalPrepHours = prepHoursNeeded;
     if (!finalPrepHours) {
@@ -20,17 +22,23 @@ router.post('/', async (req, res) => {
       finalPrepHours = estimatePrepHours(difficulty, daysUntilExam);
     }
 
-    const exam = await Exam.create({ userId, subject, date, difficulty, prepHoursNeeded: finalPrepHours });
+    const exam = await Exam.create({
+      userId: req.user._id,
+      subject,
+      date,
+      difficulty,
+      prepHoursNeeded: finalPrepHours,
+    });
     res.status(201).json(exam);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get all exams for a user
+// Get the logged-in user's exams
 router.get('/user/:userId', async (req, res) => {
   try {
-    const exams = await Exam.find({ userId: req.params.userId }).sort({ date: 1 });
+    const exams = await Exam.find({ userId: req.user._id }).sort({ date: 1 });
     res.json(exams);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -40,7 +48,12 @@ router.get('/user/:userId', async (req, res) => {
 // Update an exam
 router.put('/:id', async (req, res) => {
   try {
-    const exam = await Exam.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { userId, ...updates } = req.body; // never let the browser move an exam to another user
+    const exam = await Exam.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user._id },
+      updates,
+      { returnDocument: 'after' }
+    );
     if (!exam) return res.status(404).json({ error: 'Exam not found' });
     res.json(exam);
   } catch (err) {
@@ -51,7 +64,8 @@ router.put('/:id', async (req, res) => {
 // Delete an exam
 router.delete('/:id', async (req, res) => {
   try {
-    await Exam.findByIdAndDelete(req.params.id);
+    const exam = await Exam.findOneAndDelete({ _id: req.params.id, userId: req.user._id });
+    if (!exam) return res.status(404).json({ error: 'Exam not found' });
     res.json({ message: 'Exam deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });

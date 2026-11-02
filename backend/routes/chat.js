@@ -156,7 +156,8 @@ Progress: ${adherenceText}`;
 
 router.post('/', async (req, res) => {
   try {
-    const { userId, messages } = req.body;
+        const { messages } = req.body;
+        const userId = req.user._id; // the logged-in user, never the one sent by the browser
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'No messages sent' });
     }
