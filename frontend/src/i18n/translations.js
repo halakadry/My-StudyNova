@@ -697,4 +697,34 @@ Object.assign(translations.ar, {
   studyEvent: 'دراسة: {s}',
   examEvent: 'امتحان: {s}',
 });
+// One-time events
+Object.assign(translations.en, {
+  oneTimeEvents: 'One-time events',
+  oneTimeHint: "For things that happen once, like a doctor's appointment. Less study is planned on that day.",
+  date: 'Date',
+  eventPlaceholder: 'Dentist',
+  noEvents: 'No upcoming one-time events.',
+  errEventTime: 'The end hour must be after the start hour.',
+  errEventSave: 'Could not save the event. Please try again.',
+});
+
+Object.assign(translations.he, {
+  oneTimeEvents: 'אירועים חד־פעמיים',
+  oneTimeHint: 'לדברים שקורים פעם אחת, כמו תור לרופא. באותו יום יתוכנן פחות לימוד.',
+  date: 'תאריך',
+  eventPlaceholder: 'רופא שיניים',
+  noEvents: 'אין אירועים חד־פעמיים קרובים.',
+  errEventTime: 'שעת הסיום חייבת להיות אחרי שעת ההתחלה.',
+  errEventSave: 'לא ניתן לשמור את האירוע. נסו שוב.',
+});
+
+Object.assign(translations.ar, {
+  oneTimeEvents: 'أحداث لمرة واحدة',
+  oneTimeHint: 'لأشياء تحدث مرة واحدة، مثل موعد عند الطبيب. سيتم تخطيط دراسة أقل في ذلك اليوم.',
+  date: 'التاريخ',
+  eventPlaceholder: 'طبيب الأسنان',
+  noEvents: 'لا توجد أحداث قادمة لمرة واحدة.',
+  errEventTime: 'يجب أن تكون ساعة النهاية بعد ساعة البداية.',
+  errEventSave: 'تعذّر حفظ الحدث. حاول مرة أخرى.',
+});
 export default translations;

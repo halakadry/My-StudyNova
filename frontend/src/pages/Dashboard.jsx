@@ -12,6 +12,7 @@ import Summarizer from '../components/Summarizer';
 import LanguageMenu from '../components/LanguageMenu';
 import SupportModal from '../components/SupportModal';
 import CalendarExport from '../components/CalendarExport';
+import OneTimeEvents from '../components/OneTimeEvents';
 import { useLanguage } from '../i18n/useLanguage';
 import './Dashboard.css';
 
@@ -336,7 +337,8 @@ function Dashboard({ dbUser }) {
         wakeTime: Number(wakeTime),
         recurringCommitments: commitments,
       });
-      setSettingsSaved(true);
+            setSettingsSaved(true);
+      refreshSchedule(); // routine changed -> rebuild the plan
     } catch (err) {
       setError(t('errSaveSettings'));
     }
@@ -794,6 +796,9 @@ function Dashboard({ dbUser }) {
                 {t('add')}
               </button>
             </div>
+
+             <OneTimeEvents userId={dbUser._id} onChanged={refreshSchedule} />
+
 
             <button
               className="db-btn db-btn-primary"

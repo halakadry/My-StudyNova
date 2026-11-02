@@ -60,9 +60,19 @@ function remainingHours(total, done) {
   return Math.max(MIN_SESSION_HOURS, Math.round(left));
 }
 
+// Total hours of one-time events per date (e.g. a 2h dentist visit on 2026-11-12)
+function eventHoursByDate(user) {
+  const map = {};
+  (user.oneTimeEvents || []).forEach((e) => {
+    map[e.date] = (map[e.date] || 0) + Math.max(0, e.endHour - e.startHour);
+  });
+  return map;
+}
+
 // Realistic study hours still possible today (the day is partly over)
-function hoursLeftToday(user, weeklyAvailability, doneTodayHours) {
+function hoursLeftToday(user, weeklyAvailability, doneTodayHours, eventHours) {
   const now = new Date();
+  const today = toDateString(now);
   const nowH = now.getHours() + now.getMinutes() / 60;
   const sleep = user.sleepTime ?? 23;
   const wake = user.wakeTime ?? 8;
@@ -74,13 +84,17 @@ function hoursLeftToday(user, weeklyAvailability, doneTodayHours) {
     untilSleep = nowH >= wake ? 24 - nowH + sleep : Math.max(0, sleep - nowH);
   }
 
+  // Weekly commitments and one-time events still ahead today
   const dayName = DAYS[now.getDay()];
-  const commitmentsLeft = (user.recurringCommitments || [])
-    .filter((c) => c.day === dayName)
-    .reduce((sum, c) => sum + Math.max(0, c.endHour - Math.max(c.startHour, nowH)), 0);
+  const weeklyToday = (user.recurringCommitments || []).filter((c) => c.day === dayName);
+  const eventsToday = (user.oneTimeEvents || []).filter((e) => e.date === today);
+  const commitmentsLeft = [...weeklyToday, ...eventsToday].reduce(
+    (sum, c) => sum + Math.max(0, c.endHour - Math.max(c.startHour, nowH)),
+    0
+  );
 
   const realisticLeft = untilSleep - commitmentsLeft - 1; // 1h buffer for dinner / breaks
-  const freeToday = (weeklyAvailability[dayName] ?? 0) - doneTodayHours;
+  const freeToday = (weeklyAvailability[dayName] ?? 0) - (eventHours[today] || 0) - doneTodayHours;
 
   return Math.max(0, Math.floor(Math.min(realisticLeft, freeToday)));
 }
@@ -112,12 +126,12 @@ function buildItems(tasksForAI, examsForAI, today) {
   return [...taskItems, ...examItems];
 }
 
-// Study capacity of a given date (today = hours left today)
-function makeCapacity(weeklyAvailability, todayLimit, today) {
+// Study capacity of a given date (today = hours left today; one-time events reduce their day)
+function makeCapacity(weeklyAvailability, todayLimit, today, eventHours) {
   return (dateStr) => {
     if (dateStr === today) return todayLimit;
     const dayName = DAYS[parseDate(dateStr).getDay()];
-    return weeklyAvailability[dayName] ?? 0;
+    return Math.max(0, (weeklyAvailability[dayName] ?? 0) - (eventHours[dateStr] || 0));
   };
 }
 
@@ -252,8 +266,9 @@ async function buildAndSaveSchedule(userId) {
 
   const weeklyAvailability = calculateWeeklyAvailability(user);
   const constraints = user.constraints || {};
-  const todayLimit = hoursLeftToday(user, weeklyAvailability, doneTodayHours);
-  const capacityOf = makeCapacity(weeklyAvailability, todayLimit, today);
+  const eventHours = eventHoursByDate(user);
+  const todayLimit = hoursLeftToday(user, weeklyAvailability, doneTodayHours, eventHours);
+  const capacityOf = makeCapacity(weeklyAvailability, todayLimit, today, eventHours);
   const items = buildItems(tasksForAI, examsForAI, today);
   console.log('Today limit:', todayLimit, '| done today:', doneTodayHours, '| today:', today);
 
@@ -279,11 +294,12 @@ async function buildAndSaveSchedule(userId) {
 
   const overloadCheck = detectOverload(finalStudy, minDailyHours);
 
-  // Add recurring commitments (gym, classes...) as fixed entries, not counted as study hours
+  // Add weekly commitments + one-time events as fixed entries, not counted as study hours
   const studyEntries = finalStudy.map((e) => ({ ...e, type: 'study', completed: false }));
-  const commitmentEntries = buildCommitmentEntries(user.recurringCommitments, studyEntries);
+  const commitmentEntries = buildCommitmentEntries(user.recurringCommitments, studyEntries, user.oneTimeEvents);
   const newEntries = [...studyEntries, ...commitmentEntries].sort((a, b) => {
     if (a.date !== b.date) return a.date.localeCompare(b.date);
+    if (a.type === 'commitment' && b.type === 'commitment') return a.startHour - b.startHour; // fixed events in time order
     return (a.type === 'commitment' ? 0 : 1) - (b.type === 'commitment' ? 0 : 1);
   });
 

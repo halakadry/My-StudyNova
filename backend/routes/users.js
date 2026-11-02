@@ -2,6 +2,34 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
+function todayString() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Keeps only valid, upcoming one-time events, sorted by date and time
+function cleanEvents(events) {
+  const today = todayString();
+  return (Array.isArray(events) ? events : [])
+    .map((e) => ({
+      date: String(e.date || ''),
+      label: String(e.label || '').trim().slice(0, 60),
+      startHour: Math.round(Number(e.startHour)),
+      endHour: Math.round(Number(e.endHour)),
+    }))
+    .filter(
+      (e) =>
+        /^\d{4}-\d{2}-\d{2}$/.test(e.date) &&
+        e.date >= today &&
+        e.label &&
+        e.startHour >= 0 &&
+        e.endHour <= 24 &&
+        e.startHour < e.endHour
+    )
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startHour - b.startHour)
+    .slice(0, 100);
+}
+
 // Create or update the logged-in user's profile (called after Firebase sign-up/login).
 // The Firebase ID always comes from the verified login token, never from the browser.
 router.post('/', async (req, res) => {
@@ -12,7 +40,7 @@ router.post('/', async (req, res) => {
 
     let user = await User.findOne({ firebaseUid });
     if (user) {
-            if (name) user.name = name; // an empty name from login never erases a saved name
+      if (name) user.name = name; // an empty name from login never erases a saved name
       user.availableHoursPerDay = availableHoursPerDay ?? user.availableHoursPerDay;
       user.constraints = constraints ?? user.constraints;
       user.sleepTime = sleepTime ?? user.sleepTime;
@@ -41,18 +69,21 @@ router.get('/:firebaseUid', async (req, res) => {
   }
 });
 
-// Update settings (sleep, wake, commitments) - only your own profile
+// Update settings - only your own profile, and only the fields that were sent
 router.put('/:id/settings', async (req, res) => {
   try {
     if (!req.user || String(req.user._id) !== req.params.id) {
       return res.status(403).json({ error: 'Not allowed' });
     }
-    const { sleepTime, wakeTime, recurringCommitments, availableHoursPerDay, constraints } = req.body;
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      { sleepTime, wakeTime, recurringCommitments, availableHoursPerDay, constraints },
-      { returnDocument: 'after' }
-    );
+
+    const allowed = ['sleepTime', 'wakeTime', 'recurringCommitments', 'availableHoursPerDay', 'constraints', 'oneTimeEvents'];
+    const updates = {};
+    allowed.forEach((key) => {
+      if (req.body[key] !== undefined) updates[key] = req.body[key];
+    });
+    if (updates.oneTimeEvents) updates.oneTimeEvents = cleanEvents(updates.oneTimeEvents);
+
+    const user = await User.findByIdAndUpdate(req.user._id, updates, { returnDocument: 'after' });
     res.json(user);
   } catch (err) {
     res.status(500).json({ error: err.message });
