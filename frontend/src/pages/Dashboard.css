@@ -1219,3 +1219,139 @@ body:has(.db-page) {
   margin: 6px 0 8px;
   padding-inline-start: 18px;
 }
+/* ---------- Messages + support inbox ---------- */
+
+.db-tab-badge {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 6px;
+  margin-inline-start: 6px;
+  border-radius: 999px;
+  background: var(--db-danger);
+  color: white;
+  font-family: var(--db-sans);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.db-ticket {
+  border: 1px solid var(--db-line);
+  border-radius: 10px;
+  margin-bottom: 10px;
+  background: white;
+  overflow: hidden;
+}
+
+.db-ticket.unread {
+  border-color: var(--db-olive);
+}
+
+.db-ticket-head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.db-ticket-head:hover {
+  background: var(--db-sage);
+}
+
+.db-ticket-head:focus-visible {
+  outline: 2px solid var(--db-olive);
+  outline-offset: -2px;
+}
+
+.db-ticket-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.db-ticket-meta {
+  font-size: 12px;
+  color: var(--db-muted);
+}
+
+.db-new-label {
+  color: var(--db-danger);
+}
+
+.db-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--db-danger);
+}
+
+.db-status {
+  font-weight: 700;
+}
+
+.db-status.new {
+  color: var(--db-gold);
+}
+
+.db-status.in-progress {
+  color: var(--db-olive);
+}
+
+.db-status.resolved {
+  color: var(--db-muted);
+}
+
+.db-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid var(--db-line);
+}
+
+.db-thread-msg {
+  max-width: 85%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.db-thread-msg.mine {
+  align-self: flex-end;
+  background: var(--db-sage);
+}
+
+.db-thread-msg.theirs {
+  align-self: flex-start;
+  background: #f6f1e6;
+}
+
+.db-thread-meta {
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--db-muted);
+}
+
+.db-thread-text {
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.db-ticket-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px 14px;
+}

@@ -13,13 +13,15 @@ import LanguageMenu from '../components/LanguageMenu';
 import SupportModal from '../components/SupportModal';
 import CalendarExport from '../components/CalendarExport';
 import OneTimeEvents from '../components/OneTimeEvents';
+import MyMessages from '../components/MyMessages';
+import AdminInbox from '../components/AdminInbox';
 import { useLanguage } from '../i18n/useLanguage';
 import './Dashboard.css';
 
 // Day values stay in English (the backend uses them); only the labels are translated
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard'];
-const TAB_IDS = ['overview', 'work', 'schedule', 'analytics', 'assistant', 'summarize', 'settings'];
+const BASE_TABS = ['overview', 'work', 'schedule', 'analytics', 'assistant', 'summarize', 'messages', 'settings'];
 
 function toDateString(d) {
   const y = d.getFullYear();
@@ -51,6 +53,9 @@ function Dashboard({ dbUser }) {
 
   const [supportOpen, setSupportOpen] = useState(false);
   const [supportPrefill, setSupportPrefill] = useState('');
+  const [messagesKey, setMessagesKey] = useState(0); // reloads "Messages" after sending a new one
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const [tasks, setTasks] = useState([]);
   const [title, setTitle] = useState('');
@@ -79,6 +84,8 @@ function Dashboard({ dbUser }) {
   const [newCommitmentStart, setNewCommitmentStart] = useState('');
   const [newCommitmentEnd, setNewCommitmentEnd] = useState('');
   const [settingsSaved, setSettingsSaved] = useState(false);
+
+  const tabIds = isAdmin ? [...BASE_TABS, 'inbox'] : BASE_TABS;
 
   // Day name in the chosen language (Jan 1 2023 was a Sunday)
   const dayLabel = (day) =>
@@ -118,6 +125,24 @@ function Dashboard({ dbUser }) {
     }
   };
 
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await api.get('/reports/unread-count');
+      setUnreadCount(res.data.count || 0);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchIsAdmin = async () => {
+    try {
+      const res = await api.get('/reports/is-admin');
+      setIsAdmin(Boolean(res.data.isAdmin));
+    } catch (err) {
+      setIsAdmin(false);
+    }
+  };
+
   // Load the saved schedule. If it was last built before today, rebuild it so missed work moves forward.
   const fetchSchedule = async (allowAutoRefresh = true) => {
     try {
@@ -132,7 +157,7 @@ function Dashboard({ dbUser }) {
     }
   };
 
-  // Dynamic re-scheduling: called automatically after any task/exam change
+  // Dynamic re-scheduling: called automatically after any task/exam/routine change
   const refreshSchedule = async () => {
     setScheduleLoading(true);
     try {
@@ -151,10 +176,16 @@ function Dashboard({ dbUser }) {
       fetchExams();
       fetchSchedule();
       fetchQuizResults();
+      fetchUnreadCount();
+      fetchIsAdmin();
       setSleepTime(dbUser.sleepTime ?? 23);
       setWakeTime(dbUser.wakeTime ?? 8);
       setCommitments(dbUser.recurringCommitments ?? []);
     }
+    // Check for new support replies every 2 minutes
+    const timer = setInterval(fetchUnreadCount, 2 * 60 * 1000);
+    return () => clearInterval(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbUser]);
 
   /* ---------- Tasks ---------- */
@@ -337,7 +368,7 @@ function Dashboard({ dbUser }) {
         wakeTime: Number(wakeTime),
         recurringCommitments: commitments,
       });
-            setSettingsSaved(true);
+      setSettingsSaved(true);
       refreshSchedule(); // routine changed -> rebuild the plan
     } catch (err) {
       setError(t('errSaveSettings'));
@@ -422,9 +453,10 @@ function Dashboard({ dbUser }) {
       </header>
 
       <nav className="db-tabs">
-        {TAB_IDS.map((id) => (
+        {tabIds.map((id) => (
           <button key={id} className={`db-tab ${tab === id ? 'active' : ''}`} onClick={() => setTab(id)}>
             {t(id)}
+            {id === 'messages' && unreadCount > 0 && <span className="db-tab-badge">{unreadCount}</span>}
           </button>
         ))}
         {scheduleLoading && <span className="db-updating">{t('updatingSchedule')}</span>}
@@ -638,7 +670,7 @@ function Dashboard({ dbUser }) {
           <div className="db-panel">
             <div className="db-panel-head">
               <h2 className="db-section-title">{t('yourSchedule')}</h2>
-              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
                 <div className="db-toggle">
                   <button
                     className={scheduleView === 'week' ? 'active' : ''}
@@ -653,7 +685,7 @@ function Dashboard({ dbUser }) {
                     {t('list')}
                   </button>
                 </div>
-                                <CalendarExport entries={schedule?.entries || []} exams={exams} />
+                <CalendarExport entries={schedule?.entries || []} exams={exams} />
                 <button className="db-btn db-btn-primary" onClick={generateSchedule} disabled={scheduleLoading}>
                   {scheduleLoading ? t('updating') : t('regenerate')}
                 </button>
@@ -691,6 +723,14 @@ function Dashboard({ dbUser }) {
 
         {/* ========== ANALYTICS ========== */}
         {tab === 'analytics' && <Analytics tasks={tasks} schedule={schedule} quizResults={quizResults} />}
+
+        {/* ========== MESSAGES (support conversations) ========== */}
+        {tab === 'messages' && (
+          <MyMessages key={messagesKey} onUnreadChange={fetchUnreadCount} onNewMessage={() => openSupport()} />
+        )}
+
+        {/* ========== SUPPORT INBOX (admins only) ========== */}
+        {tab === 'inbox' && isAdmin && <AdminInbox />}
 
         {/* ========== SETTINGS ========== */}
         {tab === 'settings' && (
@@ -797,8 +837,7 @@ function Dashboard({ dbUser }) {
               </button>
             </div>
 
-             <OneTimeEvents userId={dbUser._id} onChanged={refreshSchedule} />
-
+            <OneTimeEvents userId={dbUser._id} onChanged={refreshSchedule} />
 
             <button
               className="db-btn db-btn-primary"
@@ -814,7 +853,10 @@ function Dashboard({ dbUser }) {
 
       <SupportModal
         open={supportOpen}
-        onClose={() => setSupportOpen(false)}
+        onClose={() => {
+          setSupportOpen(false);
+          setMessagesKey((k) => k + 1); // show the new message in "Messages"
+        }}
         prefill={supportPrefill}
         userId={dbUser._id}
         page={tab}
